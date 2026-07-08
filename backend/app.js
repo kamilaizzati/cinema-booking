@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
+const bioskopRoutes = require("./routes/biskopRoutes");
 
 const app = express();
 
@@ -10,5 +11,6 @@ app.use(cookieParser());
 
 // Pendaftaran Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/bioskop", bioskopRoutes);
 
 module.exports = app;
