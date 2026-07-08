@@ -2,36 +2,42 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// ==========================================
+// REGISTER
+// ==========================================
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    // TAMBAHAN: Ambil confirmPassword
+    const { name, email, password, confirmPassword } = req.body;
 
     // 1. Validasi input dasar
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       return res.status(400).json({ message: "Semua field harus diisi" });
     }
 
-    // 2. Cek apakah email sudah terdaftar (Pencegahan duplikat sesuai syarat dokumen)
+    // TAMBAHAN (Test 5): Cek kecocokan password
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Password dan konfirmasi password tidak cocok" });
+    }
+
+    // 2. Cek duplikat email
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(409).json({ message: "Email sudah terdaftar" });
     }
 
-    // 3. Hash Password (Keamanan)
+    // 3. Hash Password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4. Buat User Baru
-    // CATATAN: Kita tidak memasukkan req.body.role untuk mencegah celah keamanan
-    // di mana user publik mencoba mendaftar sebagai admin.
+    // 4. Buat User
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role: "user", // Selalu paksa jadi 'user' untuk pendaftaran publik
+      role: "user",
     });
 
-    // 5. Kembalikan response tanpa mengirimkan password
     res.status(201).json({
       success: true,
       message: "Registrasi berhasil",
@@ -43,49 +49,49 @@ exports.register = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan server",
-      error: error.message,
-    });
+    // TAMBAHAN (Test 3): Tangani error validasi dari Mongoose (seperti format email)
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ success: false, message: messages.join(', ') });
+    }
+
+    res.status(500).json({ success: false, message: "Terjadi kesalahan server", error: error.message });
   }
 };
 
 // ==========================================
-// LOGIN USER
+// LOGIN
 // ==========================================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Validasi input
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email dan password wajib diisi" });
+      return res.status(400).json({ message: "Email dan password wajib diisi" });
     }
 
-    // 2. Cari user berdasarkan email
-    const user = await User.findOne({ email });
+    // TAMBAHAN (Test 11): Paksa email menjadi string murni untuk mencegah NoSQL Injection
+    const safeEmail = String(email);
+
+    // 2. Cari user
+    const user = await User.findOne({ email: safeEmail });
     if (!user) {
       return res.status(404).json({ message: "User tidak ditemukan" });
     }
 
-    // 3. Cek kecocokan password
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    // 3. Cek password
+    const isPasswordMatch = await bcrypt.compare(String(password), user.password);
     if (!isPasswordMatch) {
       return res.status(401).json({ message: "Password salah" });
     }
 
-    // 4. Buat JWT Token
-    // Payload berisi id dan role agar bisa dicek di middleware nanti
+    // 4. Buat token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }, // Token berlaku 1 hari
+      { expiresIn: "1d" }
     );
 
-    // 5. Kirim response sukses beserta token
     res.status(200).json({
       success: true,
       message: "Login berhasil",
@@ -98,14 +104,21 @@ exports.login = async (req, res) => {
       },
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Kesalahan server",
-        error: error.message,
-      });
+    res.status(500).json({ success: false, message: "Kesalahan server", error: error.message });
   }
+};
+
+// ==========================================
+// LOGOUT (TAMBAHAN UNTUK TEST 14)
+// ==========================================
+exports.logout = (req, res) => {
+  // Jika frontend menggunakan Bearer token (disimpan di localStorage), 
+  // frontend yang bertugas menghapus tokennya.
+  // Backend hanya perlu mengirim respons sukses.
+  res.status(200).json({
+    success: true,
+    message: "Logout berhasil. Silakan hapus token di sisi client.",
+  });
 };
 
 // ==========================================
