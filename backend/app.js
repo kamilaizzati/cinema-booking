@@ -2,15 +2,19 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
 const locationRoutes = require("./routes/locationRoutes");
+const bioskopRoutes = require("./routes/bioskopRoutes");
+const movieRoutes = require("./routes/movieRoutes");
 
 const app = express();
 
-// Middleware untuk membaca JSON dan Cookies dari request
+
 app.use(express.json());
 app.use(cookieParser());
 
-// Pendaftaran Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/locations", locationRoutes);
+app.use("/api/bioskop", bioskopRoutes);
+app.use("/api/movies", movieRoutes);
+
 
 module.exports = app;
