@@ -10,17 +10,10 @@ const {
 
 const { protect, requireAdmin } = require('../middleware/authMiddleware');
 
-router.route('/')
-  .get(getMovies);
-
-router.route('/:id')
-  .get(getMovieById);
-
-router.route('/')
-  .post(createMovie);
-
-router.route('/:id')
-  .put(updateMovie)
-  .delete (deleteMovie);
+router.get("/", getMovies);
+router.get("/:id", getMovieById);
+router.post("/", createMovie);
+router.put("/:id", updateMovie);
+router.delete("/:id", deleteMovie);
 
 module.exports = router;
