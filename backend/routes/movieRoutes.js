@@ -12,8 +12,8 @@ const { protect, requireAdmin } = require('../middleware/authMiddleware');
 
 router.get("/", getMovies);
 router.get("/:id", getMovieById);
-router.post("/", createMovie);
-router.put("/:id", updateMovie);
-router.delete("/:id", deleteMovie);
+router.post("/", protect, requireAdmin, createMovie);
+router.put("/:id", protect, requireAdmin, updateMovie);
+router.delete("/:id", protect, requireAdmin, deleteMovie);
 
 module.exports = router;
