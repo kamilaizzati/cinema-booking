@@ -17,10 +17,10 @@ router.route('/:id')
   .get(getMovieById);
 
 router.route('/')
-  .post(createMovie);
+  .post(createMovie, protect, requireAdmin);
 
 router.route('/:id')
-  .put(updateMovie)
-  .delete (deleteMovie);
+  .put(updateMovie, protect, requireAdmin)
+  .delete (deleteMovie, protect, requireAdmin);
 
 module.exports = router;
