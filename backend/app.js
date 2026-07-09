@@ -4,6 +4,7 @@ const authRoutes = require("./routes/authRoutes");
 const locationRoutes = require("./routes/locationRoutes");
 const bioskopRoutes = require("./routes/bioskopRoutes");
 const movieRoutes = require("./routes/movieRoutes");
+const showtimeRoutes = require("./routes/showtimeRoutes");
 
 const app = express();
 
@@ -15,6 +16,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/bioskop", bioskopRoutes);
 app.use("/api/movies", movieRoutes);
-
+app.use("/api", showtimeRoutes);
 
 module.exports = app;
