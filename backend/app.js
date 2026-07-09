@@ -1,7 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
-const bioskopRoutes = require("./routes/biskopRoutes");
+const bioskopRoutes = require("./routes/bioskopRoutes");
 
 const app = express();
 

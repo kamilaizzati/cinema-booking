@@ -1,4 +1,5 @@
 const express = require("express");
+const { protect, requireAdmin } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 const {
@@ -11,7 +12,7 @@ const {
 
 router.get("/", getAllBioskop);
 router.get("/:id", getBioskopById);
-router.post("/", createBioskop);
-router.put("/:id", updateBioskop);
-router.delete("/:id", deleteBioskop);
+router.post("/", protect, requireAdmin, createBioskop);
+router.put("/:id", protect, requireAdmin, updateBioskop);
+router.delete("/:id", protect, requireAdmin, deleteBioskop);
 module.exports = router;
