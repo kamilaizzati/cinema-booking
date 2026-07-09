@@ -7,9 +7,9 @@ const movieRoutes = require("./routes/movieRoutes");
 const seatRoutes = require("./routes/seatRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const showtimeRoutes = require("./routes/showtimeRoutes");
+const transactionRoutes = require("./routes/transactionRoutes");
 
 const app = express();
-
 
 app.use(express.json());
 app.use(cookieParser());
@@ -22,5 +22,6 @@ app.use("/api/seats", seatRoutes);
 app.use("/api/bookings", bookingRoutes);
 
 app.use("/api", showtimeRoutes);
+app.use("/api/transactions", transactionRoutes);
 
 module.exports = app;
