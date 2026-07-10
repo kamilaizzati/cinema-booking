@@ -4,9 +4,9 @@ const authRoutes = require("./routes/authRoutes");
 const locationRoutes = require("./routes/locationRoutes");
 const bioskopRoutes = require("./routes/bioskopRoutes");
 const movieRoutes = require("./routes/movieRoutes");
+const transactionRoutes = require("./routes/transactionRoutes");
 
 const app = express();
-
 
 app.use(express.json());
 app.use(cookieParser());
@@ -15,6 +15,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/bioskop", bioskopRoutes);
 app.use("/api/movies", movieRoutes);
-
+app.use("/api/transactions", transactionRoutes);
 
 module.exports = app;
