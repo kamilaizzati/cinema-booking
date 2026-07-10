@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
 const locationRoutes = require("./routes/locationRoutes");
@@ -13,6 +14,10 @@ const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  credentials: true, // izinkan cookie dikirim
+}));
 app.use(express.json());
 app.use(cookieParser());
 
