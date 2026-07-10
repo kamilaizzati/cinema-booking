@@ -1,5 +1,6 @@
 const Transaction = require("../models/Transaction");
 const Booking = require("../models/Booking");
+const Showtime = require("../models/Showtime");
 
 // 1. Membuat Transaksi Baru
 exports.createTransaction = async (req, res) => {
@@ -162,12 +163,18 @@ exports.updateTransactionStatus = async (req, res) => {
       status === "expired"
     ) {
       // Transaksi gagal/dikembalikan, batalkan booking
-      await Booking.findByIdAndUpdate(transaction.bookingId, {
-        status: "cancelled",
-      });
+      const booking = await Booking.findByIdAndUpdate(
+        transaction.bookingId,
+        { status: "cancelled" },
+        { new: true }
+      );
 
-      // TODO (Opsional): Tambahkan logic di sini untuk merilis (release) kursi
-      // yang ada di jadwal film agar bisa dipesan kembali oleh user lain.
+      // Release kursi: hapus seats dari bookedSeats di Showtime
+      if (booking && booking.seats && booking.seats.length > 0) {
+        await Showtime.findByIdAndUpdate(booking.showtimeId, {
+          $pull: { bookedSeats: { $in: booking.seats } },
+        });
+      }
     }
 
     res.status(200).json({
