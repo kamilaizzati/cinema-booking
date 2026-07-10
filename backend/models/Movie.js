@@ -22,7 +22,11 @@ const movieSchema = new mongoose.Schema({
   },
   description: { 
     type: String 
-  }
+  },
+  release : {
+    type: Boolean,
+    default: false
+  } 
 }, { timestamps: true });
 
 module.exports = mongoose.model('Movie', movieSchema);

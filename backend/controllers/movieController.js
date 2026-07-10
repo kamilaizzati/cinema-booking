@@ -33,6 +33,8 @@ exports.getMovies = async (req, res, next) => {
   }
 };
 
+
+
 exports.getMovieById = async (req, res, next) => {
   try {
     const movie = await Movie.findById(req.params.id);
