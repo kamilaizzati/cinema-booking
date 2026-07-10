@@ -36,10 +36,13 @@ const showtimeSchema = new mongoose.Schema(
       min: [0, "Harga tidak boleh negatif"],
     },
 
-    bookedSeats: {
-      type: [String],
-      default: [],
-    },
+    bookedSeats: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Seat",
+        default: [],
+      },
+    ],
 
     isActive: {
       type: Boolean,
