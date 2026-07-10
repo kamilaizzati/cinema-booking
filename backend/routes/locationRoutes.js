@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const { protect, requireAdmin } = require("../middleware/authMiddleware");
 const {
   getAllLocations,
   getLocationById,
@@ -16,12 +16,12 @@ router.get("/", getAllLocations);
 router.get("/:id", getLocationById);
 
 // POST tambah lokasi
-router.post("/", protect, requireAdmin, createLocation);
+router.post("/", createLocation);
 
 // PUT update lokasi
-router.put("/:id", protect, requireAdmin, updateLocation);
+router.put("/:id", updateLocation);
 
 // DELETE hapus lokasi
-router.delete("/:id", protect, requireAdmin, deleteLocation);
+router.delete("/:id", deleteLocation);
 
 module.exports = router;
