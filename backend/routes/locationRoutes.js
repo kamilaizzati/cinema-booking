@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const { protect, requireAdmin } = require("../middleware/authMiddleware");
 const {
   getAllLocations,
   getLocationById,

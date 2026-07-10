@@ -96,14 +96,14 @@ exports.createShowtime = async (req, res) => {
       movieId,
       bioskopId,
       date,
-      time,
+      startTime,
       studio,
       price,
       bookedSeats,
     } = req.body;
 
     // Validasi field wajib
-    if (!movieId || !bioskopId || !date || !time || !studio || !price) {
+    if (!movieId || !bioskopId || !date || !startTime || !studio || !price) {
       return res.status(400).json({
         success: false,
         message: "Semua field wajib harus diisi",
@@ -115,7 +115,7 @@ exports.createShowtime = async (req, res) => {
       bioskopId,
       studio,
       date,
-      time,
+      startTime,
     });
 
     if (existingShowtime) {
@@ -129,7 +129,7 @@ exports.createShowtime = async (req, res) => {
       movieId,
       bioskopId,
       date,
-      time,
+      startTime,
       studio,
       price,
       bookedSeats: bookedSeats || [],

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const { protect, requireAdmin } = require("../middleware/authMiddleware");
 const {
   getShowtimesByMovie,
   getShowtimeById,
@@ -33,14 +33,14 @@ router.get("/showtimes/:id/seats", getSeatAvailability);
 
 // POST tambah showtime
 // POST /api/showtimes
-router.post("/showtimes", createShowtime);
+router.post("/showtimes", protect, requireAdmin, createShowtime);
 
 // PUT update showtime
 // PUT /api/showtimes/:id
-router.put("/showtimes/:id", updateShowtime);
+router.put("/showtimes/:id", protect, requireAdmin, updateShowtime);
 
 // DELETE showtime
 // DELETE /api/showtimes/:id
-router.delete("/showtimes/:id", deleteShowtime);
+router.delete("/showtimes/:id", protect, requireAdmin, deleteShowtime);
 
 module.exports = router;
