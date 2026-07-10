@@ -1,134 +1,5 @@
 const Showtime = require("../models/Showtime");
 
-
-// GET /api/showtimes
-// Public
-// Mengambil seluruh showtime + search + filter + pagination
-exports.getAllShowtimes = async (req, res) => {
-  try {
-    // Query yang diperbolehkan
-    const allowedQueries = [
-      "search",
-      "genre",
-      "location",
-      "bioskop",
-      "date",
-      "page",
-      "limit",
-    ];
-
-    // Cari query yang tidak dikenal
-    const invalidQuery = Object.keys(req.query).find(
-      (key) => !allowedQueries.includes(key)
-    );
-
-    if (invalidQuery) {
-      return res.status(400).json({
-        success: false,
-        message: `Query parameter '${invalidQuery}' tidak dikenali. Gunakan parameter yang valid.`,
-        allowedQueries,
-      });
-    }
-    
-    const {
-      search,
-      genre,
-      location,
-      bioskop,
-      date,
-      page = 1,
-      limit = 20,
-    } = req.query;
-
-    // Query dasar (langsung ke collection Showtime)
-    let query = {};
-
-    if (date) {
-      query.date = date;
-    }
-
-    // Ambil seluruh showtime beserta relasinya
-    let showtimes = await Showtime.find(query)
-        .populate("movieId")
-        .populate("studioId")
-        .populate({
-          path: "bioskopId",
-          populate: {
-            path: "locationId",
-          },
-        })
-        .sort({
-          date: 1,
-          time: 1,
-        });
-
-    // Search Judul Movie
-    if (search) {
-      showtimes = showtimes.filter((item) =>
-        item.movieId.title
-          .toLowerCase()
-          .includes(search.toLowerCase())
-      );
-    }
-
-    // Filter Genre
-    if (genre) {
-      showtimes = showtimes.filter(
-        (item) =>
-          item.movieId.genre.toLowerCase() ===
-          genre.toLowerCase()
-      );
-    }
-
-    // Filter Kota
-    if (location) {
-      showtimes = showtimes.filter(
-        (item) =>
-          item.bioskopId.locationId.city.toLowerCase() ===
-          location.toLowerCase()
-      );
-    }
-
-    // Filter Bioskop
-    if (bioskop) {
-      showtimes = showtimes.filter(
-        (item) =>
-          item.bioskopId.name.toLowerCase() ===
-          bioskop.toLowerCase()
-      );
-    }
-
-    // Pagination
-    const pageNumber = parseInt(page);
-    const limitNumber = parseInt(limit);
-
-    const totalItems = showtimes.length;
-
-    const startIndex = (pageNumber - 1) * limitNumber;
-
-    const paginatedData = showtimes.slice(
-      startIndex,
-      startIndex + limitNumber
-    );
-
-    res.status(200).json({
-      success: true,
-      page: pageNumber,
-      limit: limitNumber,
-      totalItems,
-      totalPages: Math.ceil(totalItems / limitNumber),
-      data: paginatedData,
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Gagal mengambil data showtime",
-      error: error.message,
-    });
-  }
-};
-
 // GET /api/movies/:movieId/showtimes
 // Public
 // Mengambil seluruh jadwal tayang berdasarkan movie
@@ -161,7 +32,6 @@ exports.getShowtimeById = async (req, res) => {
   try {
     const showtime = await Showtime.findById(req.params.id)
       .populate("movieId")
-      .populate("studioId")
       .populate({
         path: "bioskopId",
         populate: {
@@ -227,13 +97,13 @@ exports.createShowtime = async (req, res) => {
       bioskopId,
       date,
       startTime,
-      studioId,
+      studio,
       price,
       bookedSeats,
     } = req.body;
 
     // Validasi field wajib
-    if (!movieId || !bioskopId || !date || !startTime || !studioId || !price) {
+    if (!movieId || !bioskopId || !date || !startTime || !studio || !price) {
       return res.status(400).json({
         success: false,
         message: "Semua field wajib harus diisi",
@@ -243,7 +113,7 @@ exports.createShowtime = async (req, res) => {
     // Cek apakah studio sudah memiliki jadwal pada waktu yang sama
     const existingShowtime = await Showtime.findOne({
       bioskopId,
-      studioId,
+      studio,
       date,
       startTime,
     });
@@ -260,7 +130,7 @@ exports.createShowtime = async (req, res) => {
       bioskopId,
       date,
       startTime,
-      studioId,
+      studio,
       price,
       bookedSeats: bookedSeats || [],
     });

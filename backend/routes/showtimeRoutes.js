@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { protect, requireAdmin } = require("../middleware/authMiddleware");
 const {
-  getAllShowtimes,
   getShowtimesByMovie,
   getShowtimeById,
   getSeatAvailability,
@@ -14,12 +13,6 @@ const {
 // =====================================================
 // PUBLIC API
 // =====================================================
-
-// GET seluruh showtime + search + filter + pagination
-// TEST (search, genre, location, bioskop, date, page?, limit?):
-// Coba akses:
-// GET /api/showtimes?search=Avengers
-router.get("/", getAllShowtimes);
 
 // GET daftar showtime berdasarkan movie
 // GET /api/movies/:movieId/showtimes

@@ -14,10 +14,10 @@ const showtimeSchema = new mongoose.Schema(
       required: [true, "Bioskop wajib dipilih"],
     },
 
-    studioId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Studio",
-      required: [true, "Studio wajib dipilih"],
+    studio: {
+      type: String,
+      required: [true, "Studio wajib diisi"],
+      trim: true,
     },
 
     date: {
@@ -55,7 +55,7 @@ const showtimeSchema = new mongoose.Schema(
 showtimeSchema.index({
     movieId:1,
     bioskopId:1,
-    studioId:1,
+    studio:1,
     date:1,
     startTime:1
 },{

@@ -26,9 +26,8 @@ app.use("/api/bioskop", bioskopRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/seats", seatRoutes);
 app.use("/api/bookings", bookingRoutes);
-
-app.use("/api", showtimeRoutes);
+app.use("/api/showtimes", showtimeRoutes);
 app.use("/api/transactions", transactionRoutes);
-app.use("/api/studios", studioRoutes);
+app.use("/api/admin", adminRoutes);
 
 module.exports = app;

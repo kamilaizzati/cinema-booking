@@ -1,6 +1,5 @@
 const Transaction = require("../models/Transaction");
 const Booking = require("../models/Booking");
-const Showtime = require("../models/Showtime");
 
 // 1. Membuat Transaksi Baru
 exports.createTransaction = async (req, res) => {
@@ -55,12 +54,10 @@ exports.getUserTransactions = async (req, res) => {
       data: transactions,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Gagal mengambil riwayat transaksi",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Gagal mengambil riwayat transaksi",
+      error: error.message,
+    });
   }
 };
 
@@ -78,12 +75,10 @@ exports.getAllTransactions = async (req, res) => {
       data: transactions,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Gagal mengambil data transaksi",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Gagal mengambil data transaksi",
+      error: error.message,
+    });
   }
 };
 
@@ -163,18 +158,12 @@ exports.updateTransactionStatus = async (req, res) => {
       status === "expired"
     ) {
       // Transaksi gagal/dikembalikan, batalkan booking
-      const booking = await Booking.findByIdAndUpdate(
-        transaction.bookingId,
-        { status: "cancelled" },
-        { new: true }
-      );
+      await Booking.findByIdAndUpdate(transaction.bookingId, {
+        status: "cancelled",
+      });
 
-      // Release kursi: hapus seats dari bookedSeats di Showtime
-      if (booking && booking.seats && booking.seats.length > 0) {
-        await Showtime.findByIdAndUpdate(booking.showtimeId, {
-          $pull: { bookedSeats: { $in: booking.seats } },
-        });
-      }
+      // TODO (Opsional): Tambahkan logic di sini untuk merilis (release) kursi
+      // yang ada di jadwal film agar bisa dipesan kembali oleh user lain.
     }
 
     res.status(200).json({
@@ -183,11 +172,9 @@ exports.updateTransactionStatus = async (req, res) => {
       data: transaction,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Gagal memperbarui status transaksi",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Gagal memperbarui status transaksi",
+      error: error.message,
+    });
   }
 };
