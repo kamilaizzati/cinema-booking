@@ -42,7 +42,7 @@ const StudioSchema = new mongoose.Schema(
 
     cinema: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Cinema",
+      ref: "Bioskop",
     },
 
   },

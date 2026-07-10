@@ -1,0 +1,35 @@
+[
+  {
+    "_id": { "$oid": "64b000000000000000000301" },
+    "title": "The Last Horizon",
+    "genre": ["Action", "Adventure"],
+    "duration": 125,
+    "rating": "PG-13",
+    "poster": "https://media.themoviedb.org/t/p/w600_and_h900_face/zP19YO60jwEsfKd5Qf1UvA5uJu8.jpg",
+    "backgroundImage": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/1AVF2fAevpfi2HP6AEpptG1kg8R.jpg",
+    "description": "Seorang penjelajah kembali ke bumi untuk menyelamatkan kota terakhir dari ancaman yang datang dari langit.",
+    "release": true
+  },
+  {
+    "_id": { "$oid": "64b000000000000000000302" },
+    "title": "Midnight Signal",
+    "genre": ["Drama", "Mystery"],
+    "duration": 110,
+    "rating": "R13+",
+    "poster": "https://media.themoviedb.org/t/p/w600_and_h900_face/zP19YO60jwEsfKd5Qf1UvA5uJu8.jpg",
+    "backgroundImage": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/1AVF2fAevpfi2HP6AEpptG1kg8R.jpg",
+    "description": "Sebuah siaran radio misterius mempertemukan dua orang asing dan mengungkap rahasia masa lalu mereka.",
+    "release": true
+  },
+  {
+    "_id": { "$oid": "64b000000000000000000303" },
+    "title": "Kota Setelah Hujan",
+    "genre": ["Romance", "Drama"],
+    "duration": 102,
+    "rating": "SU",
+    "poster": "https://media.themoviedb.org/t/p/w600_and_h900_face/zP19YO60jwEsfKd5Qf1UvA5uJu8.jpg",
+    "backgroundImage": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/1AVF2fAevpfi2HP6AEpptG1kg8R.jpg",
+    "description": "Dua sahabat lama bertemu kembali saat hujan besar mengubah rencana mereka di sebuah kota kecil.",
+    "release": true
+  }
+]

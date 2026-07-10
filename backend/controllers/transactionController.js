@@ -178,3 +178,36 @@ exports.updateTransactionStatus = async (req, res) => {
     });
   }
 };
+
+exports.adminCreateTransaction = async (req, res) => {
+  try {
+    const { bookingId, paymentMethod, status = 'pending' } = req.body;
+    if (!bookingId || !paymentMethod) return res.status(400).json({ success: false, message: 'Booking dan metode pembayaran wajib diisi' });
+    const booking = await Booking.findById(bookingId);
+    if (!booking) return res.status(404).json({ success: false, message: 'Booking tidak ditemukan' });
+    const transaction = await Transaction.create({
+      bookingId,
+      userId: booking.userId,
+      amount: booking.totalPrice,
+      paymentMethod,
+      status,
+      paymentDate: status === 'success' ? new Date() : undefined,
+    });
+    if (status === 'success') {
+      await Booking.findByIdAndUpdate(bookingId, { status: 'confirmed' });
+    }
+    res.status(201).json({ success: true, data: transaction });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.deleteTransaction = async (req, res) => {
+  try {
+    const transaction = await Transaction.findByIdAndDelete(req.params.id);
+    if (!transaction) return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
+    res.json({ success: true, message: 'Transaksi berhasil dihapus' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

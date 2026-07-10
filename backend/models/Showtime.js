@@ -20,6 +20,12 @@ const showtimeSchema = new mongoose.Schema(
       trim: true,
     },
 
+    studioId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Studio",
+      required: [true, "Studio wajib dipilih"],
+    },
+
     date: {
       type: Date,
       required: [true, "Tanggal wajib diisi"],

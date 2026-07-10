@@ -1,0 +1,32 @@
+[
+  {
+    "_id": { "$oid": "64b000000000000000000201" },
+    "name": "Studio 1",
+    "studioId": "JKT-STD-01",
+    "totalSeats": 12,
+    "rows": 3,
+    "seatsPerRow": 4,
+    "status": "active",
+    "cinema": { "$oid": "64b000000000000000000101" }
+  },
+  {
+    "_id": { "$oid": "64b000000000000000000202" },
+    "name": "Studio 2",
+    "studioId": "JKT-STD-02",
+    "totalSeats": 12,
+    "rows": 3,
+    "seatsPerRow": 4,
+    "status": "active",
+    "cinema": { "$oid": "64b000000000000000000101" }
+  },
+  {
+    "_id": { "$oid": "64b000000000000000000203" },
+    "name": "Studio 1",
+    "studioId": "BDG-STD-01",
+    "totalSeats": 12,
+    "rows": 3,
+    "seatsPerRow": 4,
+    "status": "active",
+    "cinema": { "$oid": "64b000000000000000000102" }
+  }
+]

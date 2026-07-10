@@ -1,0 +1,14 @@
+[
+  {
+    "_id": { "$oid": "64b000000000000000000101" },
+    "name": "Cinema Jakarta Central",
+    "locationId": { "$oid": "64b000000000000000000001" },
+    "address": "Jl. M.H. Thamrin No. 1, Jakarta Pusat"
+  },
+  {
+    "_id": { "$oid": "64b000000000000000000102" },
+    "name": "Cinema Bandung City",
+    "locationId": { "$oid": "64b000000000000000000002" },
+    "address": "Jl. Merdeka No. 10, Bandung"
+  }
+]

@@ -50,6 +50,7 @@ exports.getAllShowtimes = async (req, res) => {
     // Ambil seluruh showtime beserta relasinya
     let showtimes = await Showtime.find(query)
         .populate("movieId")
+        .populate("studioId")
         .populate({
           path: "bioskopId",
           populate: {
@@ -136,7 +137,9 @@ exports.getShowtimesByMovie = async (req, res) => {
     const { movieId } = req.params;
 
     const showtimes = await Showtime.find({ movieId })
+      .populate("movieId")
       .populate("bioskopId", "name address")
+      .populate("studioId")
       .sort({ date: 1, time: 1 });
 
     res.status(200).json({
@@ -160,6 +163,7 @@ exports.getShowtimeById = async (req, res) => {
   try {
     const showtime = await Showtime.findById(req.params.id)
       .populate("movieId")
+      .populate("studioId")
       .populate({
         path: "bioskopId",
         populate: {
@@ -228,12 +232,13 @@ exports.createShowtime = async (req, res) => {
       date,
       startTime,
       studio,
+      studioId,
       price,
       bookedSeats,
     } = req.body;
 
     // Validasi field wajib
-    if (!movieId || !bioskopId || !date || !startTime || !studio || !price) {
+    if (!movieId || !bioskopId || !date || !startTime || !studio || !studioId || !price) {
       return res.status(400).json({
         success: false,
         message: "Semua field wajib harus diisi",
@@ -244,6 +249,7 @@ exports.createShowtime = async (req, res) => {
     const existingShowtime = await Showtime.findOne({
       bioskopId,
       studio,
+      studioId,
       date,
       startTime,
     });
@@ -258,6 +264,7 @@ exports.createShowtime = async (req, res) => {
     const showtime = await Showtime.create({
       movieId,
       bioskopId,
+      studioId,
       date,
       startTime,
       studio,
