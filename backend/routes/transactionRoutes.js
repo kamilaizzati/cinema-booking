@@ -8,7 +8,7 @@ const {
   updateTransactionStatus, // <-- Controller baru
 } = require("../controllers/transactionController");
 
-const { protect, requireAdmin } = require("../middlewares/authMiddleware");
+const { protect, requireAdmin } = require("../middleware/authMiddleware");
 
 // Endpoint untuk user
 router.post("/", protect, createTransaction);
