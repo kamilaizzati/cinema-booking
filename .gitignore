@@ -26,3 +26,12 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Folder selain backend
+frontend/
+.postman/
+postman/
+
+# File tidak relevan di root
+*.pdf
+package-lock.json
