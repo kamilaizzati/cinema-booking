@@ -24,28 +24,10 @@ const movieSchema = new mongoose.Schema(
     description: {
       type: String,
     },
-    genre: {
-      type: String,
-      required: [true, "Genre is required"],
-    },
-    duration: {
-      type: Number,
-      required: [true, "Duration is required"],
-      min: [1, "Duration must be positive"],
-    },
-    rating: {
-      type: String,
-    },
-    poster: {
-      type: String,
-    },
-    description: {
-      type: String,
-    },
     release: {
       type: Boolean,
       default: false,
-    },
+    }
   },
   { timestamps: true },
 );
