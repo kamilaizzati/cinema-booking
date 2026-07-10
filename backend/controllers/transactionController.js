@@ -1,5 +1,5 @@
-const Transaction = require("../models/transactionModel");
-const Booking = require("../models/bookingModel");
+const Transaction = require("../models/Transaction");
+const Booking = require("../models/Booking");
 
 // 1. Membuat Transaksi Baru
 exports.createTransaction = async (req, res) => {
