@@ -193,7 +193,8 @@ exports.getShowtimeById = async (req, res) => {
 // Mengambil daftar kursi yang sudah dipesan
 exports.getSeatAvailability = async (req, res) => {
   try {
-    const showtime = await Showtime.findById(req.params.id);
+    const showtime = await Showtime.findById(req.params.id)
+      .populate("bookedSeats", "code"); // populate hanya field code
 
     if (!showtime) {
       return res.status(404).json({
@@ -204,7 +205,7 @@ exports.getSeatAvailability = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      bookedSeats: showtime.bookedSeats,
+      bookedSeats: showtime.bookedSeats, // [{ _id, code }]
     });
   } catch (error) {
     res.status(500).json({
@@ -214,6 +215,7 @@ exports.getSeatAvailability = async (req, res) => {
     });
   }
 };
+
 
 // POST /api/showtimes
 // Admin

@@ -340,13 +340,16 @@ Ambil detail satu showtime.
   "success": true,
   "data": {
     "_id": "64abc...",
-    "movieId": { "title": "Avengers: Endgame", ... },
-    "bioskopId": { "name": "CGV Grand Indonesia", ... },
+    "movieId": { "title": "Avengers: Endgame" },
+    "bioskopId": { "name": "CGV Grand Indonesia" },
     "studioId": { "name": "Studio 1", "totalSeats": 100 },
     "date": "2025-08-01T00:00:00.000Z",
     "startTime": "14:00",
     "price": 50000,
-    "bookedSeats": ["A1", "A2"],
+    "bookedSeats": [
+      { "_id": "64abc...", "code": "A1" },
+      { "_id": "64def...", "code": "A2" }
+    ],
     "isActive": true
   }
 }
@@ -361,7 +364,10 @@ Ambil daftar kursi yang sudah dipesan pada showtime tertentu.
 ```json
 {
   "success": true,
-  "bookedSeats": ["A1", "A2", "B5", "C3"]
+  "bookedSeats": [
+    { "_id": "64abc...", "code": "A1" },
+    { "_id": "64def...", "code": "A2" }
+  ]
 }
 ```
 
@@ -502,6 +508,8 @@ Buat booking baru sekaligus mengunci kursi pada showtime secara **atomic** (race
 }
 ```
 
+> **Catatan:** `seats` dikirim sebagai **kode kursi** (misal `"A1"`), bukan ObjectId. Backend akan otomatis mencari ObjectId-nya dari Seat collection dan memvalidasi bahwa kursi tersebut benar-benar ada di studio yang bersangkutan.
+
 **Response `201`:**
 ```json
 {
@@ -512,10 +520,22 @@ Buat booking baru sekaligus mengunci kursi pada showtime secara **atomic** (race
     "userId": "64userId...",
     "movieId": "64movieId...",
     "showtimeId": "64showtimeId...",
-    "seats": ["A1", "A2"],
+    "seats": [
+      { "_id": "64abc...", "code": "A1" },
+      { "_id": "64def...", "code": "A2" }
+    ],
     "totalPrice": 100000,
     "status": "pending"
   }
+}
+```
+
+**Response `400`** (kursi tidak valid di studio):
+```json
+{
+  "success": false,
+  "message": "Kursi tidak valid untuk studio ini",
+  "invalidSeats": ["Z99"]
 }
 ```
 
