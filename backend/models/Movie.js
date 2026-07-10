@@ -21,9 +21,16 @@ const movieSchema = new mongoose.Schema(
     poster: {
       type: String,
     },
+    backgroundImage: {
+      type: String,
+    },
     description: {
       type: String,
     },
+    release: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true },
 );
