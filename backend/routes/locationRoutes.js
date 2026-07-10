@@ -16,12 +16,12 @@ router.get("/", getAllLocations);
 router.get("/:id", getLocationById);
 
 // POST tambah lokasi
-router.post("/", createLocation);
+router.post("/", protect, requireAdmin, createLocation);
 
 // PUT update lokasi
-router.put("/:id", updateLocation);
+router.put("/:id", protect, requireAdmin, updateLocation);
 
 // DELETE hapus lokasi
-router.delete("/:id", deleteLocation);
+router.delete("/:id", protect, requireAdmin, deleteLocation);
 
 module.exports = router;

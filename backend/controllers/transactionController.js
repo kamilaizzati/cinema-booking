@@ -54,12 +54,10 @@ exports.getUserTransactions = async (req, res) => {
       data: transactions,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Gagal mengambil riwayat transaksi",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Gagal mengambil riwayat transaksi",
+      error: error.message,
+    });
   }
 };
 
@@ -77,12 +75,10 @@ exports.getAllTransactions = async (req, res) => {
       data: transactions,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Gagal mengambil data transaksi",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Gagal mengambil data transaksi",
+      error: error.message,
+    });
   }
 };
 
@@ -176,11 +172,9 @@ exports.updateTransactionStatus = async (req, res) => {
       data: transaction,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Gagal memperbarui status transaksi",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Gagal memperbarui status transaksi",
+      error: error.message,
+    });
   }
 };
