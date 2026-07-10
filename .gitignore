@@ -28,10 +28,9 @@ Thumbs.db
 *.sw?
 
 # Folder selain backend
-frontend/
 .postman/
 postman/
 
 # File tidak relevan di root
 *.pdf
-package-lock.json
+/package-lock.json

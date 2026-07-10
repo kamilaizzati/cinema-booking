@@ -1,0 +1,228 @@
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Plus, Edit, Trash2, Building } from 'lucide-react';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import toast from 'react-hot-toast';
+import { showtimeService } from '@/services/showtimeService';
+// ============== HallForm Component ==============
+// This is the part that needed fixing.
+const HallForm = ({ hallToEdit, onClose, onSave }) => {
+    const { register, handleSubmit, reset, formState: { errors, isSubmitting }, } = useForm();
+    useEffect(() => {
+        if (hallToEdit) {
+            reset(hallToEdit);
+        }
+        else {
+            reset({
+                hall_name: '',
+                total_seats: 100,
+                layout_rows: 10,
+                layout_columns: 10,
+            });
+        }
+    }, [hallToEdit, reset]);
+    // --- ✅ CORRECTED onSubmit Handler ---
+    // It now uses fetch to send data to the backend API.
+    const onSubmit = async (formData) => {
+        try {
+            const dataToSubmit = {
+                ...formData,
+                total_seats: Number(formData.total_seats),
+                layout_rows: Number(formData.layout_rows),
+                layout_columns: Number(formData.layout_columns),
+            };
+            if (hallToEdit) {
+                await showtimeService.updateHall(hallToEdit._id, dataToSubmit);
+            }
+            else {
+                await showtimeService.createHall(dataToSubmit);
+            }
+            toast.success(`Studio ${hallToEdit ? 'updated' : 'added'} successfully!`);
+            onSave();
+        }
+        catch (error) {
+            toast.error(error.message);
+            console.error('Error saving hall:', error);
+        }
+    };
+    return (<div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-dark-900/80 p-4 sm:items-center">
+      <div className="card relative my-auto w-full max-w-lg p-6">
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white">&times;</button>
+        <h2 className="text-2xl font-bold mb-6">{hallToEdit ? 'Edit Studio' : 'Add New Studio'}</h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Studio Name</label>
+            <input {...register('hall_name', { required: 'Studio name is required' })} className="input"/>
+            {errors.hall_name && <p className="text-red-400 text-sm mt-1">{errors.hall_name.message}</p>}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Total Seats</label>
+              <input type="number" {...register('total_seats', { required: 'Total seats is required', valueAsNumber: true })} className="input"/>
+              {errors.total_seats && <p className="text-red-400 text-sm mt-1">{errors.total_seats.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Rows</label>
+              <input type="number" {...register('layout_rows', { required: 'Number of rows is required', valueAsNumber: true })} className="input"/>
+              {errors.layout_rows && <p className="text-red-400 text-sm mt-1">{errors.layout_rows.message}</p>}
+            </div>
+             <div>
+              <label className="block text-sm font-medium mb-1">Columns</label>
+              <input type="number" {...register('layout_columns', { required: 'Number of columns is required', valueAsNumber: true })} className="input"/>
+              {errors.layout_columns && <p className="text-red-400 text-sm mt-1">{errors.layout_columns.message}</p>}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-4 pt-4">
+            <button type="button" onClick={onClose} className="btn btn-secondary">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+              {isSubmitting ? <LoadingSpinner size="sm"/> : 'Save Studio'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>);
+};
+const DeleteConfirmationModal = ({ hall, onClose, onConfirm }) => {
+    return (<div className="fixed inset-0 bg-dark-900/80 z-50 flex items-center justify-center">
+            <div className="card p-6 w-full max-w-md">
+                <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
+                <p className="text-slate-300 mb-6">
+                    Are you sure you want to delete "<strong>{hall.hall_name}</strong>"? This action cannot be undone.
+                </p>
+                <div className="flex justify-end space-x-4">
+                    <button onClick={onClose} className="btn btn-secondary">
+                        Cancel
+                    </button>
+                    <button onClick={() => onConfirm(hall._id)} className="btn btn-danger">
+                        Delete Studio
+                    </button>
+                </div>
+            </div>
+        </div>);
+};
+// ============== AdminHallsPage Component ==============
+export default function AdminHallsPage() {
+    const [halls, setHalls] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingHall, setEditingHall] = useState(null);
+    const [hallToDelete, setHallToDelete] = useState(null);
+    useEffect(() => {
+        fetchHalls();
+    }, []);
+    const fetchHalls = async () => {
+        setLoading(true);
+        try {
+            const data = await showtimeService.getHalls();
+            setHalls(data || []);
+        }
+        catch (error) {
+            toast.error('Failed to load halls');
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+    const handleOpenModal = (hall) => {
+        setEditingHall(hall);
+        setIsModalOpen(true);
+    };
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingHall(null);
+    };
+    const handleSave = () => {
+        fetchHalls();
+        handleCloseModal();
+    };
+    const handleDeleteClick = (hall) => {
+        setHallToDelete(hall);
+    };
+    const handleConfirmDelete = async (hallId) => {
+        try {
+            await showtimeService.deleteHall(hallId);
+            toast.success('Studio deleted successfully');
+            fetchHalls();
+        }
+        catch (error) {
+            toast.error(error.message || 'Failed to delete hall');
+        }
+        finally {
+            setHallToDelete(null);
+        }
+    };
+    if (loading) {
+        return (<div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg"/>
+      </div>);
+    }
+    return (<div className="space-y-6">
+      {isModalOpen && (<HallForm hallToEdit={editingHall} onClose={handleCloseModal} onSave={handleSave}/>)}
+      {hallToDelete && (<DeleteConfirmationModal hall={hallToDelete} onClose={() => setHallToDelete(null)} onConfirm={handleConfirmDelete}/>)}
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-display font-bold">Studios</h1>
+          <p className="text-slate-400">Manage your cinema studios</p>
+        </div>
+        <button onClick={() => handleOpenModal(null)} className="btn btn-primary flex items-center space-x-2">
+          <Plus className="h-5 w-5"/>
+          <span>Add Studio</span>
+        </button>
+      </div>
+
+      {halls.length === 0 ? (<div className="text-center py-12 card">
+          <Building className="h-16 w-16 text-slate-600 mx-auto mb-4"/>
+          <p className="text-slate-400 text-lg mb-4">No studios found</p>
+          <button onClick={() => handleOpenModal(null)} className="btn btn-primary">
+            Add Your First Studio
+          </button>
+        </div>) : (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {halls.map((hall) => (<div key={hall._id} className="card p-6 flex flex-col">
+              <div className="flex-grow">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-primary-500/20 rounded-lg flex items-center justify-center">
+                        <Building className="h-6 w-6 text-primary-400"/>
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-semibold text-white">{hall.hall_name}</h3>
+                        <p className="text-sm text-slate-400 truncate">ID: {hall._id}</p>
+                    </div>
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <div className="flex justify-between">
+                    <span className="text-slate-400">Total Seats</span>
+                    <span className="text-white font-medium">{hall.total_seats}</span>
+                    </div>
+                    <div className="flex justify-between">
+                    <span className="text-slate-400">Layout</span>
+                    <span className="text-white font-medium">
+                        {hall.layout_rows} × {hall.layout_columns}
+                    </span>
+                    </div>
+                    <div className="flex justify-between">
+                    <span className="text-slate-400">Created</span>
+                    <span className="text-white font-medium">
+                        {new Date(hall.createdAt).toLocaleDateString()}
+                    </span>
+                    </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-dark-700 flex items-center space-x-2">
+                <button onClick={() => handleOpenModal(hall)} className="btn btn-secondary flex-1 flex items-center justify-center space-x-2">
+                  <Edit className="h-4 w-4"/>
+                  <span>Edit</span>
+                </button>
+                <button onClick={() => handleDeleteClick(hall)} className="btn btn-danger flex-1 flex items-center justify-center space-x-2">
+                  <Trash2 className="h-4 w-4"/>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>))}
+        </div>)}
+    </div>);
+}

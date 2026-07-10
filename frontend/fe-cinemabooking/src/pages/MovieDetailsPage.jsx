@@ -1,0 +1,200 @@
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Calendar, Clock, MapPin, Play, Star, Ticket } from 'lucide-react';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { movieService } from '@/services/movieService';
+import { showtimeService } from '@/services/showtimeService';
+export default function MovieDetailsPage() {
+    const { id } = useParams();
+    const [movie, setMovie] = useState(null);
+    const [showtimes, setShowtimes] = useState([]);
+    const [selectedDate, setSelectedDate] = useState('');
+    const [selectedShowtime, setSelectedShowtime] = useState(null);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        if (id) {
+            fetchMovie(id);
+        }
+    }, [id]);
+    const fetchMovie = async (movieId) => {
+        try {
+            const [movieData, showtimeData] = await Promise.all([
+                movieService.getMovieById(movieId),
+                showtimeService.getMovieShowtimes(movieId),
+            ]);
+            const bookableShowtimes = movieData.status === 'now_showing' ? showtimeData : [];
+            setMovie(movieData);
+            setShowtimes(bookableShowtimes);
+            setSelectedShowtime(null);
+            if (bookableShowtimes.length > 0) {
+                setSelectedDate(bookableShowtimes[0].show_date.split('T')[0]);
+            }
+            else {
+                setSelectedDate('');
+            }
+        }
+        catch (error) {
+            console.error('Error fetching movie:', error);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+    const availableDates = [...new Set(showtimes.map((showtime) => showtime.show_date.split('T')[0]))];
+    const visibleShowtimes = showtimes.filter((showtime) => showtime.show_date.startsWith(selectedDate));
+    if (loading) {
+        return (<div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg"/>
+      </div>);
+    }
+    if (!movie) {
+        return (<div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Movie Not Found</h1>
+          <Link to="/movies" className="btn btn-primary">
+            Back to Movies
+          </Link>
+        </div>
+      </div>);
+    }
+    const backdrop = movie.backdrop_url || movie.poster_url;
+    const canBook = movie.status === 'now_showing' && showtimes.length > 0;
+    return (<div className="min-h-screen">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${backdrop})` }}>
+          <div className="absolute inset-0 bg-gradient-to-r from-dark-950 via-dark-950/85 to-dark-950/40"/>
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-dark-950 to-transparent"/>
+        </div>
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[300px_1fr] lg:px-8 lg:py-16">
+          {/* Movie Poster */}
+          <div>
+            <div className="max-w-[260px]">
+              <img src={movie.poster_url || ''} alt={movie.title} className="w-full rounded-lg shadow-2xl shadow-black/60"/>
+            </div>
+          </div>
+
+          {/* Movie Details */}
+          <div className="flex items-center">
+            <div className="max-w-3xl space-y-6">
+              <div>
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <span className="cinema-badge bg-primary-600/90">{movie.status === 'coming_soon' ? 'Coming Soon' : 'Now Playing'}</span>
+                  {movie.classification && <span className="cinema-badge">{movie.classification}</span>}
+                  {movie.rating ? (<div className="flex items-center space-x-1 text-accent-400">
+                      <Star className="h-5 w-5 fill-current"/>
+                      <span className="font-semibold">{movie.rating.toFixed(1)}</span>
+                    </div>) : null}
+                </div>
+                <h1 className="text-4xl font-display font-black mb-4 md:text-6xl">
+                  {movie.title}
+                </h1>
+                
+                <div className="flex flex-wrap items-center gap-6 text-slate-400 mb-6">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="h-5 w-5"/>
+                    <span>{new Date(movie.release_date).getFullYear()}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-5 w-5"/>
+                    <span>{movie.duration} minutes</span>
+                  </div>
+                  <div className="px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm font-medium">
+                    {movie.genre}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {canBook ? (<Link to={selectedShowtime ? `/booking/${selectedShowtime._id}` : `/book/${movie._id}`} className="btn btn-primary text-lg px-8 py-3">
+                    <Ticket className="h-5 w-5"/>
+                    Buy Tickets
+                  </Link>) : (<button type="button" className="btn btn-secondary text-lg px-8 py-3" disabled>
+                    <Ticket className="h-5 w-5"/>
+                    No showtime yet
+                  </button>)}
+                {movie.trailer_url && (<a href="#trailer" className="btn btn-secondary text-lg px-8 py-3">
+                    <Play className="h-5 w-5"/>
+                    Watch Trailer
+                  </a>)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+              <div>
+                <p className="section-eyebrow mb-3">Story</p>
+                <h2 className="text-2xl font-semibold mb-4">Synopsis</h2>
+                <p className="text-slate-300 leading-relaxed text-lg">
+                  {movie.description}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold mb-2">Director</h2>
+                  <p className="text-slate-300">{movie.director || 'To be announced'}</p>
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold mb-2">Cast</h2>
+                  <p className="text-slate-300">{movie.cast?.join(', ') || 'To be announced'}</p>
+                </div>
+              </div>
+
+              {/* Trailer */}
+              {movie.trailer_url && (<div id="trailer">
+                  <p className="section-eyebrow mb-3">Preview</p>
+                  <h2 className="text-2xl font-semibold mb-4">Trailer</h2>
+                  <div className="aspect-video rounded-xl overflow-hidden bg-dark-800">
+                    <iframe src={movie.trailer_url} title={`${movie.title} Trailer`} className="w-full h-full" allowFullScreen/>
+                  </div>
+                </div>)}
+
+          </div>
+
+          <aside className="lg:col-span-1">
+              {showtimes.length > 0 ? (<div className="cinema-panel sticky top-24 p-6">
+                  <p className="section-eyebrow mb-3">Book now</p>
+                  <h2 className="text-2xl font-semibold mb-4">Select Showtime</h2>
+                  <div className="mb-5 flex items-center gap-2 rounded-md bg-dark-950 px-3 py-2 text-sm text-slate-300">
+                    <MapPin className="h-4 w-4 text-accent-400"/>
+                    CinemaID Grand Indonesia
+                  </div>
+                  <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
+                    {availableDates.map((date) => (<button key={date} onClick={() => {
+                    setSelectedDate(date);
+                    setSelectedShowtime(null);
+                }} className={`min-w-24 rounded-md px-4 py-3 text-left transition ${selectedDate === date ? 'bg-primary-600 text-white' : 'bg-dark-950 text-slate-300 hover:bg-dark-800'}`}>
+                        <span className="block text-xs uppercase opacity-70">
+                          {new Date(date).toLocaleDateString('en-US', { weekday: 'short' })}
+                        </span>
+                        <span className="block font-bold">
+                          {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>
+                      </button>))}
+                  </div>
+                  <div className="space-y-3">
+                    {visibleShowtimes.map((showtime) => (<button key={showtime._id} onClick={() => setSelectedShowtime(showtime)} className={`w-full rounded-lg border p-4 text-left transition hover:border-primary-500 ${selectedShowtime?._id === showtime._id ? 'border-primary-500 bg-primary-500/10' : ''}`}>
+                        <div className="flex items-center justify-between">
+                          <p className="text-lg font-bold">{showtime.start_time}</p>
+                          <p className="text-accent-400 font-semibold">IDR {showtime.ticket_price.toLocaleString()}</p>
+                        </div>
+                        <p className="text-sm text-slate-400">{showtime.hall.hall_name} • {showtime.end_time} finish</p>
+                      </button>))}
+                  </div>
+                  <Link to={selectedShowtime ? `/booking/${selectedShowtime._id}` : `/book/${movie._id}`} className="btn btn-primary mt-5 w-full py-3 text-base">
+                    <Ticket className="h-5 w-5"/>
+                    Continue to Seats
+                  </Link>
+                </div>) : (<div className="cinema-panel p-6">
+                  <h2 className="text-xl font-semibold">No showtimes yet</h2>
+                  <p className="mt-2 text-slate-400">Check back soon for available sessions.</p>
+                </div>)}
+          </aside>
+        </div>
+      </div>
+    </div>);
+}

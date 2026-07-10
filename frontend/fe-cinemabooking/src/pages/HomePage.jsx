@@ -1,0 +1,324 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CalendarDays, MapPin, Play, Search, Star, Ticket } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import MovieCard from '@/components/MovieCard';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { movieService } from '@/services/movieService';
+import { showtimeService } from '@/services/showtimeService';
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function HomePage() {
+    const [movies, setMovies] = useState([]);
+    const [showtimeMovieIds, setShowtimeMovieIds] = useState(new Set());
+    const [loading, setLoading] = useState(true);
+    const [featuredMovie, setFeaturedMovie] = useState(null);
+    const [error, setError] = useState('');
+    const heroTrackRef = useRef(null);
+    const heroPosterRef = useRef(null);
+    const heroCopyRef = useRef(null);
+    useEffect(() => {
+        fetchMovies();
+    }, []);
+    const fetchMovies = async () => {
+        try {
+            const [data, showtimes] = await Promise.all([
+                movieService.getMovies(),
+                showtimeService.getShowtimes(),
+            ]);
+            setMovies(data || []);
+            setShowtimeMovieIds(new Set((showtimes || []).map((showtime) => showtime.movie?._id).filter(Boolean)));
+            if (data && data.length > 0) {
+                setFeaturedMovie(0);
+            }
+        }
+        catch (error) {
+            console.error('Error fetching movies:', error);
+            setError('Could not load demo movies.');
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+    const nowShowing = movies.filter((movie) => movie.status === 'now_showing');
+    const comingSoon = movies.filter((movie) => movie.status === 'coming_soon');
+    const heroSlides = nowShowing.slice(0, 3);
+    const heroMovie = heroSlides[featuredMovie] || heroSlides[0] || movies[0];
+    useEffect(() => {
+        if (heroSlides.length <= 1) return;
+        const timer = window.setInterval(() => {
+            setFeaturedMovie((current) => (typeof current === 'number' ? (current + 1) % heroSlides.length : 1));
+        }, 3000);
+        return () => window.clearInterval(timer);
+    }, [heroSlides.length]);
+    useEffect(() => {
+        if (!heroSlides.length || typeof featuredMovie !== 'number') return;
+        gsap.to(heroTrackRef.current, {
+            xPercent: -100 * featuredMovie,
+            duration: 0.9,
+            ease: 'power3.inOut',
+        });
+        gsap.fromTo(heroCopyRef.current, { autoAlpha: 0, x: 38 }, { autoAlpha: 1, x: 0, duration: 0.7, ease: 'power3.out', delay: 0.15 });
+        gsap.fromTo(heroPosterRef.current, { autoAlpha: 0, x: 70, rotate: 2 }, { autoAlpha: 1, x: 0, rotate: 0, duration: 0.75, ease: 'power3.out', delay: 0.18 });
+    }, [featuredMovie, heroSlides.length]);
+    useEffect(() => {
+        const cards = document.querySelectorAll('.movie-reveal-card');
+        if (cards.length === 0) return undefined;
+        const ctx = gsap.context(() => {
+            gsap.set(cards, { autoAlpha: 0, y: 42, scale: 0.96 });
+            ScrollTrigger.batch(cards, {
+                start: 'top 88%',
+                once: true,
+                onEnter: (batch) => gsap.to(batch, {
+                    autoAlpha: 1,
+                    y: 0,
+                    scale: 1,
+                    duration: 0.65,
+                    ease: 'power3.out',
+                    stagger: 0.08,
+                }),
+            });
+        });
+        return () => ctx.revert();
+    }, [movies.length]);
+    if (loading) {
+        return (<div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg"/>
+      </div>);
+    }
+    return (<div className="min-h-screen">
+      {/* Hero Section */}
+      {heroMovie && (<section className="cinema-hero relative min-h-[82vh] overflow-hidden">
+          <div ref={heroTrackRef} className="absolute inset-0 flex will-change-transform">
+            {heroSlides.map((movie) => (
+              <div
+                key={movie._id}
+                className="relative h-full w-full flex-none bg-cover bg-center"
+                style={{ backgroundImage: `url(${movie.backdrop_url || movie.poster_url})` }}
+              />
+            ))}
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-dark-950 via-dark-950/80 to-dark-950/15"/>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,transparent_0,rgba(0,0,0,.25)_30%,rgba(0,0,0,.75)_74%)]"/>
+          <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-dark-950 to-transparent"/>
+          
+          <div className="relative z-10 grid min-h-[82vh] max-w-7xl items-center gap-10 px-4 pb-32 pt-16 sm:px-6 lg:mx-auto lg:grid-cols-[minmax(0,1fr)_330px] lg:px-8">
+            <div ref={heroCopyRef} className="max-w-3xl">
+              <div className="mb-5 flex flex-wrap items-center gap-3">
+                <span className="cinema-badge bg-primary-500/95">Now Playing</span>
+                {heroMovie.classification && <span className="cinema-badge">{heroMovie.classification}</span>}
+                {heroMovie.rating ? (<span className="inline-flex items-center gap-1 text-sm font-semibold text-accent-300">
+                    <Star className="h-4 w-4 fill-current"/>
+                    {heroMovie.rating.toFixed(1)}
+                  </span>) : null}
+              </div>
+              <h1 className="mb-5 max-w-3xl text-5xl font-black text-white md:text-7xl">
+                {heroMovie.title}
+            </h1>
+              <p className="mb-6 max-w-2xl text-lg leading-8 text-slate-200">
+                {heroMovie.description}
+            </p>
+              <div className="mb-8 flex flex-wrap gap-3 text-sm text-slate-300">
+                <span>{heroMovie.genre}</span>
+                <span>&bull;</span>
+                <span>{heroMovie.duration} minutes</span>
+                <span>&bull;</span>
+                <span>{new Date(heroMovie.release_date).getFullYear()}</span>
+              </div>
+              <div className="flex flex-col gap-4 sm:flex-row">
+              <Link to={`/book/${heroMovie._id}`} className="btn btn-primary text-lg px-8 py-3">
+                <Ticket className="h-5 w-5 mr-2"/>
+                Buy Tickets
+              </Link>
+              <Link to={`/movies/${heroMovie._id}`} className="btn btn-secondary text-lg px-8 py-3">
+                <Play className="h-5 w-5 mr-2"/>
+                View Details
+              </Link>
+              </div>
+              {heroSlides.length > 1 && (
+                <div className="mt-10 flex items-center gap-3">
+                  {heroSlides.map((movie, index) => (
+                    <button
+                      key={movie._id}
+                      type="button"
+                      onClick={() => setFeaturedMovie(index)}
+                      className={`h-1.5 rounded-full transition-all ${index === featuredMovie ? 'w-12 bg-primary-500' : 'w-7 bg-white/35 hover:bg-white/60'}`}
+                      aria-label={`Show ${movie.title}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="hidden lg:block">
+              <div ref={heroPosterRef} className="relative mx-auto w-full max-w-[310px] overflow-hidden rounded border border-white/15 bg-black/35 p-3 shadow-2xl shadow-black/60 backdrop-blur">
+                <img src={heroMovie.poster_url} alt={heroMovie.title} className="aspect-[2/3] w-full rounded object-cover"/>
+                <div className="absolute inset-x-3 bottom-3 rounded-b bg-gradient-to-t from-black via-black/75 to-transparent p-5 pt-20">
+                  <p className="text-xs font-black uppercase tracking-[0.24em] text-primary-400">Featured</p>
+                  <p className="mt-1 text-lg font-black text-white">{heroMovie.title}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>)}
+
+      <section className="relative z-20 -mt-20 px-4 sm:px-6 lg:px-8">
+        <div className="cinema-panel mx-auto max-w-7xl p-4 sm:p-5">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+            <label className="group">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">City</span>
+              <div className="flex items-center gap-3 rounded-md border border-white/10 bg-dark-950 px-4 py-3">
+                <MapPin className="h-5 w-5 text-primary-500"/>
+                <select className="w-full bg-transparent text-sm font-semibold text-white outline-none">
+                  <option>Jakarta</option>
+                  <option>Bandung</option>
+                  <option>Surabaya</option>
+                </select>
+              </div>
+            </label>
+            <label>
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Cinema</span>
+              <div className="flex items-center gap-3 rounded-md border border-white/10 bg-dark-950 px-4 py-3">
+                <Ticket className="h-5 w-5 text-primary-500"/>
+                <select className="w-full bg-transparent text-sm font-semibold text-white outline-none">
+                  <option>Grand Indonesia</option>
+                  <option>Central Park</option>
+                  <option>Senayan City</option>
+                </select>
+              </div>
+            </label>
+            <label>
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Date</span>
+              <div className="flex items-center gap-3 rounded-md border border-white/10 bg-dark-950 px-4 py-3">
+                <CalendarDays className="h-5 w-5 text-primary-500"/>
+                <select className="w-full bg-transparent text-sm font-semibold text-white outline-none">
+                  <option>Today, Jul 7</option>
+                  <option>Tomorrow, Jul 8</option>
+                  <option>Weekend</option>
+                </select>
+              </div>
+            </label>
+            <Link to="/movies" className="btn btn-accent self-end px-6 py-3">
+              <Search className="h-5 w-5"/>
+              Find Showtimes
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Now Showing Section */}
+      <section className="px-4 py-16 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="section-eyebrow mb-3">Sedang Tayang</p>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+                Film Sedang Tayang
+            </h2>
+              <p className="mt-3 max-w-2xl text-slate-400">
+                Pilih film yang sedang tayang, cek detailnya, lalu lanjut booking kursi.
+            </p>
+            </div>
+            <Link to="/movies" className="btn btn-secondary">
+              Lihat Semua
+            </Link>
+          </div>
+
+          {error && (<div className="card p-4 mb-8 text-red-300 border-red-500/40">
+              {error}
+            </div>)}
+
+          {nowShowing.length > 0 ? (<>
+              <MovieRail movies={nowShowing} showtimeMovieIds={showtimeMovieIds}/>
+            </>) : (<div className="text-center py-12">
+              <p className="text-slate-400 text-lg">No movies currently showing.</p>
+            </div>)}
+        </div>
+      </section>
+
+      <section className="px-4 py-8 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="section-eyebrow mb-3">Akan Tayang</p>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+                Film Akan Tayang
+            </h2>
+              <p className="mt-3 max-w-2xl text-slate-400">
+                Daftar film berikutnya dengan poster, genre, dan jadwal rilis yang mudah discroll.
+            </p>
+            </div>
+          </div>
+          {comingSoon.length > 0 ? <MovieRail movies={comingSoon} showtimeMovieIds={showtimeMovieIds}/> : (<div className="text-center py-12">
+              <p className="text-slate-400 text-lg">No coming soon movies in demo data.</p>
+            </div>)}
+        </div>
+      </section>
+    </div>);
+}
+
+function MovieRail({ movies, showtimeMovieIds }) {
+    const railRef = useRef(null);
+    const trackRef = useRef(null);
+    const loopedMovies = useMemo(() => [...movies, ...movies, ...movies], [movies]);
+    useEffect(() => {
+        const track = trackRef.current;
+        const rail = railRef.current;
+        if (!track || !rail || movies.length <= 1) return;
+        let segmentWidth = track.scrollWidth / 3;
+        let wheelTween;
+        let resetting = false;
+        const recalc = () => {
+            segmentWidth = track.scrollWidth / 3;
+            rail.scrollLeft = segmentWidth;
+        };
+        const keepInLoop = () => {
+            if (resetting || !segmentWidth) return;
+            if (rail.scrollLeft < segmentWidth * 0.35) {
+                resetting = true;
+                rail.scrollLeft += segmentWidth;
+                resetting = false;
+            }
+            if (rail.scrollLeft > segmentWidth * 1.65) {
+                resetting = true;
+                rail.scrollLeft -= segmentWidth;
+                resetting = false;
+            }
+        };
+        const onWheel = (event) => {
+            if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+            event.preventDefault();
+            wheelTween?.kill();
+            wheelTween = gsap.to(rail, {
+                scrollLeft: rail.scrollLeft + event.deltaY * 1.25,
+                duration: 0.45,
+                ease: 'power3.out',
+                onUpdate: keepInLoop,
+            });
+        };
+        rail.addEventListener('wheel', onWheel, { passive: false });
+        rail.addEventListener('scroll', keepInLoop, { passive: true });
+        window.addEventListener('resize', recalc);
+        requestAnimationFrame(recalc);
+        return () => {
+            rail.removeEventListener('wheel', onWheel);
+            rail.removeEventListener('scroll', keepInLoop);
+            window.removeEventListener('resize', recalc);
+            wheelTween?.kill();
+        };
+    }, [movies.length]);
+
+    return (
+      <div ref={railRef} className="cinema-row infinite-card-rail">
+        <div ref={trackRef} className="infinite-card-track">
+          {loopedMovies.map((movie, index) => (
+            <div className="movie-reveal-card w-[215px] flex-none sm:w-[235px] lg:w-[250px]" key={`${movie._id}-${index}`}>
+              <MovieCard movie={movie} hasShowtimes={movie.status === 'now_showing' && showtimeMovieIds.has(movie._id)}/>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+}
+
