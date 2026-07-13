@@ -11,7 +11,8 @@
     "director": "Christopher Nolan",
     "cast": ["Matthew McConaughey", "Anne Hathaway", "Jessica Chastain"],
     "release_date": { "$date": "2014-11-07T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=2LqzF5WauAw"
   },
   {
     "_id": { "$oid": "64b000000000000000000302" },
@@ -25,7 +26,8 @@
     "director": "Denis Villeneuve",
     "cast": ["Timothee Chalamet", "Zendaya", "Rebecca Ferguson"],
     "release_date": { "$date": "2024-03-01T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=Way9Dexny3w"
   },
   {
     "_id": { "$oid": "64b000000000000000000303" },
@@ -39,7 +41,8 @@
     "director": "Muhadkly Acho",
     "cast": ["Bene Dion Rajagukguk", "Oki Rengga", "Indra Jegel"],
     "release_date": { "$date": "2024-02-01T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=0YLSPyGA4h0"
   },
   {
     "_id": { "$oid": "64b000000000000000000304" },
@@ -53,7 +56,8 @@
     "director": "Joaquim Dos Santos, Kemp Powers, Justin K. Thompson",
     "cast": ["Shameik Moore", "Hailee Steinfeld", "Brian Tyree Henry"],
     "release_date": { "$date": "2023-06-02T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=cqGjhVJWtEg"
   },
   {
     "_id": { "$oid": "64b000000000000000000305" },
@@ -67,7 +71,8 @@
     "director": "Bong Joon Ho",
     "cast": ["Song Kang-ho", "Lee Sun-kyun", "Cho Yeo-jeong"],
     "release_date": { "$date": "2019-05-30T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=5xH0HfJHsaY"
   },
   {
     "_id": { "$oid": "64b000000000000000000307" },
@@ -81,7 +86,8 @@
     "director": "Anthony Russo, Joe Russo",
     "cast": ["Robert Downey Jr.", "Chris Evans", "Mark Ruffalo"],
     "release_date": { "$date": "2019-04-26T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=hA6hldpSTF8"
   },
   {
     "_id": { "$oid": "64b000000000000000000308" },
@@ -95,7 +101,8 @@
     "director": "Kelsey Mann",
     "cast": ["Amy Poehler", "Maya Hawke", "Kensington Tallman"],
     "release_date": { "$date": "2024-06-14T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=LEjhY15eCx0"
   },
   {
     "_id": { "$oid": "64b000000000000000000309" },
@@ -109,7 +116,8 @@
     "director": "Christopher Nolan",
     "cast": ["Christian Bale", "Heath Ledger", "Aaron Eckhart"],
     "release_date": { "$date": "2008-07-18T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=EXeTwQWrcwY"
   },
   {
     "_id": { "$oid": "64b000000000000000000311" },
@@ -123,7 +131,8 @@
     "director": "Thea Sharrock",
     "cast": ["Emilia Clarke", "Sam Claflin", "Janet McTeer"],
     "release_date": { "$date": "2016-06-03T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=T0MmkG_nG1U"
   },
   {
     "_id": { "$oid": "64b000000000000000000312" },
@@ -137,6 +146,7 @@
     "director": "Im Sang-soo",
     "cast": ["Jeon Do-yeon", "Lee Jung-jae", "Youn Yuh-jung"],
     "release_date": { "$date": "2010-05-13T00:00:00.000Z" },
-    "release": true
+    "release": true,
+    "trailer": "http://www.youtube.com/watch?v=lhYEwBpBvmM"
   }
 ]
