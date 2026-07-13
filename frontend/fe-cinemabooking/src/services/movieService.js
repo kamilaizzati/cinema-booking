@@ -10,6 +10,9 @@ const normalizeMovie = (movie) => {
     release_date: movie.release_date || movie.releaseDate || movie.createdAt,
     // Backend menggunakan `release`; UI menggunakan status.
     status: movie.status || (movie.release ? 'now_showing' : 'coming_soon'),
+
+    director: movie.director || [],
+    cast: movie.cast || [],
   };
 };
 
