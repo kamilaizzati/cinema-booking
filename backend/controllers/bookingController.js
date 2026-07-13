@@ -151,6 +151,25 @@ const createBooking = async (req, res) => {
 
 const updateBooking = async (req, res) => {
   try {
+    const { status } = req.body;
+
+    // If cancelling, release the seats first
+    if (status === "cancelled") {
+      const existing = await Booking.findById(req.params.id);
+      if (!existing) {
+        return res.status(404).json({
+          success: false,
+          message: "Booking not found",
+        });
+      }
+
+      if (existing.status !== "cancelled" && existing.seats.length > 0) {
+        await Showtime.findByIdAndUpdate(existing.showtimeId, {
+          $pull: { bookedSeats: { $in: existing.seats } },
+        });
+      }
+    }
+
     const booking = await Booking.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
