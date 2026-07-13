@@ -134,7 +134,7 @@ export default function HomePage() {
                 key={movie._id}
                 className="relative h-full w-full flex-none bg-cover bg-center"
                 style={{
-                  backgroundImage: `url(${movie.backdrop_url || movie.poster_url})`,
+                  backgroundImage: `url(${movie.backgroundImage || movie.backdrop_url || movie.poster || movie.poster_url})`,
                 }}
               />
             ))}
@@ -214,7 +214,7 @@ export default function HomePage() {
                 className="relative mx-auto w-full max-w-[310px] overflow-hidden rounded border border-white/15 bg-black/35 p-3 shadow-2xl shadow-black/60 backdrop-blur"
               >
                 <img
-                  src={heroMovie.poster_url}
+                  src={heroMovie.poster || heroMovie.poster_url}
                   alt={heroMovie.title}
                   className="aspect-[2/3] w-full rounded object-cover"
                 />

@@ -6,7 +6,7 @@
     "duration": 169,
     "rating": "PG-13",
     "poster": "https://media.themoviedb.org/t/p/w600_and_h900_face/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-    "backgroundImage": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/xJHwPuF3b6zOa2N2B43D5zF3y26.jpg",
+    "backgroundImage": "https://media.themoviedb.org/t/p/w1066_and_h600_face/2ssWTSVklAEc98frZUQhgtGHx7s.jpg",
     "description": "Sebuah tim penjelajah antariksa melakukan perjalanan melalui lubang cacing (wormhole) di luar angkasa dalam upaya untuk mencari planet baru dan memastikan kelangsungan hidup umat manusia.",
     "release_date": { "$date": "2014-11-07T00:00:00.000Z" },
     "release": true
@@ -17,8 +17,8 @@
     "genre": ["Science Fiction", "Adventure"],
     "duration": 166,
     "rating": "PG-13",
-    "poster": "https://media.themoviedb.org/t/p/w600_and_h900_face/1pdfLvkbY9ohJlCjQH2TDpi9kr.jpg",
-    "backgroundImage": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/8z7rC8uIDaTM91X0ZfkRf04YDjN.jpg",
+    "poster": "https://media.themoviedb.org/t/p/w440_and_h660_face/heM4XKC0jA8fTSNe8F7oUkcJV7Z.jpg",
+    "backgroundImage": "https://image.tmdb.org/t/p/original/24Ov8wnusgnzXwjV1eDm0Lzo5da.jpg",
     "description": "Paul Atreides bersatu dengan Chani dan kaum Fremen saat ia memulai jalur balas dendam terhadap para konspirator yang menghancurkan keluarganya.",
     "release_date": { "$date": "2024-03-01T00:00:00.000Z" },
     "release": true
@@ -29,8 +29,8 @@
     "genre": ["Comedy", "Horror"],
     "duration": 119,
     "rating": "D13+",
-    "poster": "https://media.themoviedb.org/t/p/w600_and_h900_face/2s2z0zU8z3Oq4Q1i5sT6X6Y2A3s.jpg",
-    "backgroundImage": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/8a2e5c9b7f3d1a4e6c8b9d0a2f4e.jpg",
+    "poster": "https://media.themoviedb.org/t/p/w440_and_h660_face/QBxira0clJwdCRHu2O2rELU9J.jpg",
+    "backgroundImage": "https://image.tmdb.org/t/p/original/qmMBtsppnetH4wyQjLfqBd23CiF.jpg",
     "description": "Demi mengejar mimpi, empat sekawan penjaga rumah hantu di pasar malam mencari cara baru menakuti pengunjung untuk menyelamatkan usaha mereka yang hampir bangkrut.",
     "release_date": { "$date": "2024-02-01T00:00:00.000Z" },
     "release": true
@@ -41,8 +41,8 @@
     "genre": ["Animation", "Action", "Adventure"],
     "duration": 140,
     "rating": "SU",
-    "poster": "https://media.themoviedb.org/t/p/w600_and_h900_face/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
-    "backgroundImage": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/4HodYYKEIsGOdinkGi2Ucz6X9i0.jpg",
+    "poster": "https://media.themoviedb.org/t/p/w440_and_h660_face/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+    "backgroundImage": "https://media.themoviedb.org/t/p/w1066_and_h600_face/9xfDWXAUbFXQK585JvByT5pEAhe.jpg",
     "description": "Miles Morales terlempar melintasi Multiverse, di mana ia bertemu dengan tim Spider-People yang bertugas melindungi keberadaannya dari ancaman baru.",
     "release_date": { "$date": "2023-06-02T00:00:00.000Z" },
     "release": true
@@ -54,7 +54,7 @@
     "duration": 132,
     "rating": "D17+",
     "poster": "https://media.themoviedb.org/t/p/w600_and_h900_face/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
-    "backgroundImage": "https://media.themoviedb.org/t/p/w1920_and_h800_multi_faces/vI3aUGTuRRdM7J78KIdW98LdxE5.jpg",
+    "backgroundImage": "https://image.tmdb.org/t/p/original/25tz24hlrqAbjhpHx1FhmfPH8Qf.jpg",
     "description": "Semua pengangguran, keluarga Ki-taek memiliki ketertarikan yang aneh terhadap keluarga Park yang kaya raya demi mencari nafkah, sampai mereka terjerat dalam insiden yang tak terduga.",
     "release_date": { "$date": "2019-05-30T00:00:00.000Z" },
     "release": true

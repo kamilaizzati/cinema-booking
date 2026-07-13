@@ -167,7 +167,7 @@ export default function AdminBookingsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <img src={booking.showtime?.movie?.poster_url || 'https://placehold.co/60x90/0f172a/94a3b8?text=N/A'} alt={booking.showtime?.movie?.title} className="w-10 h-15 object-cover rounded"/>
+                        <img src={booking.showtime?.movie?.poster || booking.showtime?.movie?.poster_url || 'https://placehold.co/60x90/0f172a/94a3b8?text=N/A'} alt={booking.showtime?.movie?.title} className="w-10 h-15 object-cover rounded"/>
                         <div className="ml-3">
                           <div className="text-sm font-medium text-white">{booking.showtime?.movie?.title}</div>
                           <div className="text-sm text-slate-400">{booking.showtime?.hall?.hall_name}</div>

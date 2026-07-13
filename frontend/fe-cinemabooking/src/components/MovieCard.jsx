@@ -7,7 +7,7 @@ export default function MovieCard({ movie, hasShowtimes = true }) {
     const genres = Array.isArray(movie.genre) ? movie.genre.join(', ') : movie.genre;
     return (<div className="movie-card group flex h-full flex-col">
       <div className="relative aspect-[2/3] flex-none overflow-hidden">
-        <img src={movie.poster_url || 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop'} alt={movie.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
+        <img src={movie.poster || movie.poster_url || 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop'} alt={movie.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
         <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/20 to-transparent opacity-90"/>
         <div className="absolute left-3 right-3 top-3 flex items-start justify-between gap-2">
           <span className={`cinema-badge ${isComingSoon ? 'text-accent-200' : 'text-white'}`}>
