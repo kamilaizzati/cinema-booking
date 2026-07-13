@@ -191,7 +191,7 @@ export default function PaymentPage() {
                 </div>
               </div>
               <button onClick={onSubmit} disabled={loading} className="btn btn-primary w-full text-lg mt-4 py-3">
-                {loading ? <LoadingSpinner size="sm"/> : 'Konfirmasi Metode Pembayaran'}
+                {loading ? <LoadingSpinner size="sm"/> : 'Confirm Payment Method'}
               </button>
             </div>
           </div>

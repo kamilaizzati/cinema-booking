@@ -218,13 +218,13 @@ export default function MovieDetailsPage() {
                   <h2 className="text-2xl font-semibold mb-4">Select Showtime</h2>
                   <div className="mb-5 grid gap-3">
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-slate-400">Lokasi</label>
+                      <label className="mb-1 block text-sm font-medium text-slate-400">Location</label>
                       <select value={selectedLocation} onChange={(event) => {
                     setSelectedLocation(event.target.value);
                     setSelectedBioskop('');
                     setSelectedShowtime(null);
                 }} className="input">
-                        <option value="">Semua lokasi</option>
+                        <option value="">All Locations</option>
                         {locations.map((location) => (<option key={location._id} value={location._id}>
                             {location.city || location.name}
                           </option>))}
@@ -236,14 +236,14 @@ export default function MovieDetailsPage() {
                     setSelectedBioskop(event.target.value);
                     setSelectedShowtime(null);
                 }} className="input">
-                        <option value="">Semua bioskop</option>
+                        <option value="">All Cinemas</option>
                         {filteredBioskops.map((bioskop) => (<option key={bioskop._id} value={bioskop._id}>
                             {bioskop.name}
                           </option>))}
                       </select>
                     </div>
                   </div>
-                  <div className="mb-3 flex items-center gap-2 text-sm text-slate-400"><MapPin className="h-4 w-4 text-accent-400"/>Pilih lokasi, bioskop, dan tanggal tayang.</div>
+                  <div className="mb-3 flex items-center gap-2 text-sm text-slate-400"><MapPin className="h-4 w-4 text-accent-400"/>Select a location, cinema, and showtime.</div>
                   {selectedLocation && selectedBioskop ? (
                     <>
                       <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
@@ -272,9 +272,9 @@ export default function MovieDetailsPage() {
                   ) : (
                     <div className="rounded-lg border border-white/5 bg-white/5 p-6 text-center text-slate-400">
                       <MapPin className="h-10 w-10 mx-auto mb-3 opacity-20 text-accent-400" />
-                      <p className="text-white text-sm font-semibold">Silakan Pilih Lokasi & Bioskop</p>
+                      <p className="text-white text-sm font-semibold">Select your Location & Cinema</p>
                       <p className="text-xs text-slate-400 mt-1">
-                        Pilih lokasi dan bioskop di atas untuk melihat jadwal tayang yang tersedia.
+                        Select a location and cinema above to view available showtimes.
                       </p>
                     </div>
                   )}
