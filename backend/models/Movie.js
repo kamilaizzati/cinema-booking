@@ -27,6 +27,16 @@ const movieSchema = new mongoose.Schema(
     description: {
       type: String,
     },
+    director: {
+        type: String,
+        trim: true,
+    },
+    cast: [
+        {
+            type: String,
+            trim: true,
+        }
+    ],
     trailer: {
       type: String,
     },

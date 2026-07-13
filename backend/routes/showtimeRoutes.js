@@ -51,3 +51,4 @@ router.put("/showtimes/:id", protect, requireAdmin, updateShowtime);
 router.delete("/showtimes/:id", protect, requireAdmin, deleteShowtime);
 
 module.exports = router;
+
