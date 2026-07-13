@@ -130,7 +130,19 @@ const MovieForm = ({ movieToEdit, onClose, onSave }) => {
               </label>
               <input
                 type="number"
-                {...register("duration", { required: "Duration is required" })}
+                min="1"
+                max="300"
+                {...register("duration", {
+                  required: "Duration is required",
+                  min: {
+                    value: 1,
+                    message: "Duration must be at least 1 minute",
+                  },
+                  max: {
+                    value: 300,
+                    message: "Duration cannot be more than 300 minutes",
+                  },
+                })}
                 className="input"
               />
               {errors.duration && (
