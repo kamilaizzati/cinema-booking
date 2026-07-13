@@ -36,7 +36,14 @@ const getBookings = async (req, res) => {
     const bookings = await Booking.find()
       .populate("userId")
       .populate("movieId")
-      .populate("showtimeId")
+      .populate({
+        path: "showtimeId",
+        populate: [
+          { path: "movieId" },
+          { path: "bioskopId", populate: { path: "locationId" } },
+          { path: "studioId" },
+        ],
+      })
       .populate("seats"); // populate detail kursi
 
     res.status(200).json({
@@ -56,7 +63,14 @@ const getBookingById = async (req, res) => {
     const booking = await Booking.findById(req.params.id)
       .populate("userId")
       .populate("movieId")
-      .populate("showtimeId")
+      .populate({
+        path: "showtimeId",
+        populate: [
+          { path: "movieId" },
+          { path: "bioskopId", populate: { path: "locationId" } },
+          { path: "studioId" },
+        ],
+      })
       .populate("seats"); // populate detail kursi
 
     if (!booking) {

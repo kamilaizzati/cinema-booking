@@ -122,31 +122,43 @@ export default function BookingsPage() {
           </div>) : (<div className="space-y-6">
             {bookings.map((booking) => {
                 const transaction = transactions.find(t => (t.bookingId?._id || t.bookingId) === booking._id);
+                const cinemaName =
+                  booking.showtime?.cinema_name ||
+                  booking.showtime?.bioskop?.name ||
+                  booking.showtime?.cinema?.name ||
+                  '-';
+                const studioName =
+                  booking.showtime?.hall?.hall_name ||
+                  booking.showtime?.studio ||
+                  '-';
                 return (<div key={booking._id} className="card p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex items-start space-x-4 mb-4 lg:mb-0">
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-center">
+                  <div className="flex items-start gap-5">
                     <img src={booking.showtime?.movie?.poster || booking.showtime?.movie?.poster_url || 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=100&h=150&fit=crop'} alt={booking.showtime?.movie?.title} className="w-16 h-24 object-cover rounded-lg"/>
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <h3 className="text-xl font-semibold mb-2">
                         {booking.showtime?.movie?.title}
                       </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm text-slate-400">
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="h-4 w-4"/>
-                          <span>{booking.showtime?.hall?.hall_name}</span>
+                      <div className="grid grid-cols-1 items-start gap-x-8 gap-y-3 text-sm leading-5 text-slate-400 sm:grid-cols-[minmax(190px,1.4fr)_120px_90px_minmax(120px,1fr)]">
+                        <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-2">
+                          <MapPin className="mt-0.5 h-4 w-4"/>
+                          <span className="min-w-0 leading-5">
+                            <span className="block truncate">{cinemaName}</span>
+                            <span className="block truncate">{studioName}</span>
+                          </span>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="h-4 w-4"/>
+                        <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-2">
+                          <Calendar className="mt-0.5 h-4 w-4"/>
                           <span>
                             {new Date(booking.showtime?.show_date || '').toLocaleDateString()}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-1">
-                          <Clock className="h-4 w-4"/>
+                        <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-2">
+                          <Clock className="mt-0.5 h-4 w-4"/>
                           <span>{booking.showtime?.start_time}</span>
                         </div>
-                        <div>
-                          <span>Seats: {booking.selected_seats?.join(', ')}</span>
+                        <div className="min-w-0 leading-5">
+                          <span className="block truncate">Seats: {booking.selected_seats?.join(', ')}</span>
                         </div>
                       </div>
                       <div className="mt-3 flex flex-wrap items-center gap-4">
@@ -177,7 +189,7 @@ export default function BookingsPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 lg:justify-end">
                     <Link to={`/tickets/${booking._id}`} className="btn btn-secondary flex items-center space-x-2">
                       <Eye className="h-4 w-4"/>
                       <span>View</span>

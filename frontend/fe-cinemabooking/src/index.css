@@ -71,10 +71,16 @@
 
   .infinite-card-rail {
     @apply cursor-grab select-none touch-pan-x;
+    scroll-snap-type: none;
+    scroll-behavior: auto;
   }
 
   .infinite-card-rail:active {
     @apply cursor-grabbing;
+  }
+
+  .infinite-card-rail > * {
+    scroll-snap-align: none;
   }
 
   .cinema-row::-webkit-scrollbar {
