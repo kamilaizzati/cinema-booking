@@ -10,6 +10,13 @@ import { showtimeService } from "@/services/showtimeService";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const getShowtimeMovieId = (showtime) => {
+  const movie = showtime.movie || showtime.movieId;
+  if (!movie) return null;
+  if (typeof movie === "string") return movie;
+  return movie._id || movie.$oid || null;
+};
+
 export default function HomePage() {
   const [movies, setMovies] = useState([]);
   const [showtimeMovieIds, setShowtimeMovieIds] = useState(new Set());
@@ -28,13 +35,13 @@ export default function HomePage() {
     try {
       const [data, showtimes] = await Promise.all([
         movieService.getMovies(),
-        showtimeService.getShowtimes(),
+        showtimeService.getShowtimes({ limit: 5000 }),
       ]);
       setMovies(data || []);
       setShowtimeMovieIds(
         new Set(
           (showtimes || [])
-            .map((showtime) => showtime.movie?._id)
+            .map(getShowtimeMovieId)
             .filter(Boolean),
         ),
       );
@@ -333,7 +340,7 @@ function MovieRail({ movies, showtimeMovieIds }) {
               movie={movie}
               hasShowtimes={
                 movie.status === "now_showing" &&
-                showtimeMovieIds.has(movie._id)
+                (showtimeMovieIds.has(movie._id) || movie.release === true)
               }
             />
           </div>

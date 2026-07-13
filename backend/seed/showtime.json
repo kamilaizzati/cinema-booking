@@ -47518,5 +47518,225 @@
     "price": 50000,
     "bookedSeats": [],
     "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042161"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000307"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000101"
+    },
+    "studio": "Studio 1",
+    "studioId": {
+      "$oid": "64b000000000000000020001"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "13:00",
+    "price": 50000,
+    "bookedSeats": [],
+    "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042162"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000307"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000101"
+    },
+    "studio": "Studio 2",
+    "studioId": {
+      "$oid": "64b000000000000000020002"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "19:00",
+    "price": 50000,
+    "bookedSeats": [],
+    "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042163"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000308"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000102"
+    },
+    "studio": "Studio 1",
+    "studioId": {
+      "$oid": "64b000000000000000020003"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "13:00",
+    "price": 40000,
+    "bookedSeats": [],
+    "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042164"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000308"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000102"
+    },
+    "studio": "Studio 2",
+    "studioId": {
+      "$oid": "64b000000000000000020004"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "15:30",
+    "price": 45000,
+    "bookedSeats": [],
+    "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042165"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000309"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000103"
+    },
+    "studio": "Studio 1",
+    "studioId": {
+      "$oid": "64b000000000000000020005"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "19:00",
+    "price": 50000,
+    "bookedSeats": [],
+    "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042166"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000309"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000103"
+    },
+    "studio": "Studio 2",
+    "studioId": {
+      "$oid": "64b000000000000000020006"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "21:15",
+    "price": 50000,
+    "bookedSeats": [],
+    "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042167"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000311"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000104"
+    },
+    "studio": "Studio 1",
+    "studioId": {
+      "$oid": "64b000000000000000020007"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "15:30",
+    "price": 45000,
+    "bookedSeats": [],
+    "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042168"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000311"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000104"
+    },
+    "studio": "Studio 2",
+    "studioId": {
+      "$oid": "64b000000000000000020008"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "19:00",
+    "price": 45000,
+    "bookedSeats": [],
+    "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042169"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000312"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000105"
+    },
+    "studio": "Studio 1",
+    "studioId": {
+      "$oid": "64b000000000000000020009"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "17:00",
+    "price": 45000,
+    "bookedSeats": [],
+    "isActive": true
+  },
+  {
+    "_id": {
+      "$oid": "64b000000000000000042170"
+    },
+    "movieId": {
+      "$oid": "64b000000000000000000312"
+    },
+    "bioskopId": {
+      "$oid": "64b000000000000000000105"
+    },
+    "studio": "Studio 2",
+    "studioId": {
+      "$oid": "64b000000000000000020010"
+    },
+    "date": {
+      "$date": "2026-07-16T00:00:00.000Z"
+    },
+    "startTime": "21:15",
+    "price": 45000,
+    "bookedSeats": [],
+    "isActive": true
   }
 ]
