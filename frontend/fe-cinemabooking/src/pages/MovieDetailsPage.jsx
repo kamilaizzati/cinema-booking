@@ -235,7 +235,7 @@ export default function MovieDetailsPage() {
                     setSelectedShowtime(null);
                 }} className="input">
                         <option value="">All Locations</option>
-                        {locations.map((location) => (<option key={location._id} value={location._id}>
+                        {availableLocations.map((location) => (<option key={location._id} value={location._id}>
                             {location.city || location.name}
                           </option>))}
                       </select>
