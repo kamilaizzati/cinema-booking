@@ -14,7 +14,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-slate-400 mb-6 max-w-md">
-              Premium moviegoing with curated showtimes, comfortable halls, quick checkout, and e-tickets ready before the lights go down.
+              Premium movie going with curated showtimes, comfortable halls, quick checkout, and e-tickets ready before the lights go down.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-slate-400 hover:text-primary-400 transition-colors">

@@ -145,8 +145,8 @@ export default function MoviesPage() {
             </div>
             {(selectedStatus === 'all' || selectedStatus === 'now_showing') && nowShowing.length > 0 && (
               <MovieGrid
-                title="Film Sedang Tayang"
-                eyebrow="Sedang Tayang"
+                title="Movies in Theaters"
+                eyebrow="Current Release"
                 movies={visibleNowShowing}
                 showtimeMovieIds={showtimeMovieIds}
                 currentPage={activePage}
@@ -157,8 +157,8 @@ export default function MoviesPage() {
             )}
             {(selectedStatus === 'all' || selectedStatus === 'coming_soon') && comingSoon.length > 0 && (
               <MovieGrid
-                title="Film Akan Tayang"
-                eyebrow="Akan Tayang"
+                title="Upcoming in Theaters"
+                eyebrow="Releasing Soon"
                 movies={comingSoon}
                 showtimeMovieIds={showtimeMovieIds}
                 currentPage={1}
