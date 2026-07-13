@@ -189,7 +189,7 @@ function MovieGrid({ eyebrow, title, movies, showtimeMovieIds, currentPage, tota
           <p className="text-sm text-slate-400">{totalMovies} film</p>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
-          {movies.map((movie) => <MovieCard key={movie._id} movie={movie} hasShowtimes={movie.status === 'now_showing' && showtimeMovieIds.has(movie._id)}/>)}
+          {movies.map((movie) => <MovieCard key={movie._id} movie={movie} hasShowtimes={movie.status === 'now_showing' && (showtimeMovieIds.has(movie._id) || movie.release === true)}/>)}
         </div>
         {totalPages > 1 && (
           <div className="mt-8 flex items-center justify-center gap-3">
