@@ -204,6 +204,7 @@ const ShowtimeForm = ({ showtimeToEdit, showtimes = [], onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-dark-900/80 z-50 flex items-center justify-center p-4">
+    
       <div className="card w-full max-w-2xl p-6 relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
@@ -421,6 +422,7 @@ export default function AdminShowtimesPage() {
     setLoading(true);
     try {
       const data = await showtimeService.getShowtimes();
+      console.log("Showtimes API:", data);
       setShowtimes(data || []);
       const counts = await Promise.all(
         data.map(async (showtime) => [
@@ -633,4 +635,5 @@ export default function AdminShowtimesPage() {
       )}
     </div>
   );
+  
 }
