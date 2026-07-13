@@ -9,6 +9,29 @@ import { showtimeService } from "@/services/showtimeService";
 import { bookingService } from "@/services/bookingService";
 import { bioskopService } from "@/services/bioskopService";
 
+const getId = (value) => {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value._id || value.$oid || "";
+};
+
+const getShowtimeMovieId = (showtime) =>
+  getId(showtime?.movie) || getId(showtime?.movieId);
+
+const getShowtimeBioskopId = (showtime) =>
+  getId(showtime?.bioskopId) || getId(showtime?.bioskop);
+
+const getShowtimeStudioId = (showtime) =>
+  getId(showtime?.hall) || getId(showtime?.studioId);
+
+const getShowtimeDate = (showtime) =>
+  showtime?.show_date || showtime?.date || "";
+
+const toDateInputValue = (value) => {
+  if (!value) return "";
+  return new Date(value).toISOString().split("T")[0];
+};
+
 const ShowtimeForm = ({ showtimeToEdit, showtimes = [], onClose, onSave }) => {
   const [movies, setMovies] = useState([]);
   const [halls, setHalls] = useState([]);
@@ -47,16 +70,13 @@ const ShowtimeForm = ({ showtimeToEdit, showtimes = [], onClose, onSave }) => {
   useEffect(() => {
     if (showtimeToEdit) {
       reset({
-        movie_id: showtimeToEdit.movie._id,
-        hall_id: showtimeToEdit.hall._id || "",
-        bioskop_id:
-          showtimeToEdit.bioskopId?._id || showtimeToEdit.bioskopId || "",
-        show_date: new Date(showtimeToEdit.show_date)
-          .toISOString()
-          .split("T")[0],
-        start_time: showtimeToEdit.start_time,
-        end_time: showtimeToEdit.end_time,
-        ticket_price: showtimeToEdit.ticket_price,
+        movie_id: getShowtimeMovieId(showtimeToEdit),
+        hall_id: getShowtimeStudioId(showtimeToEdit),
+        bioskop_id: getShowtimeBioskopId(showtimeToEdit),
+        show_date: toDateInputValue(getShowtimeDate(showtimeToEdit)),
+        start_time: showtimeToEdit.start_time || showtimeToEdit.startTime || "",
+        end_time: showtimeToEdit.end_time || showtimeToEdit.endTime || "",
+        ticket_price: showtimeToEdit.ticket_price || showtimeToEdit.price || "",
       });
     } else {
       reset();
@@ -111,16 +131,16 @@ const ShowtimeForm = ({ showtimeToEdit, showtimes = [], onClose, onSave }) => {
       if (showtimeToEdit && st._id === showtimeToEdit._id) return false;
 
       // Cek apakah Studio (hall) sama
-      const sameStudio = st.hall?._id === formData.hall_id;
+      const sameStudio = getShowtimeStudioId(st) === formData.hall_id;
 
       // Cek apakah Tanggal tayang sama
-      const sameDate = st.show_date.startsWith(formData.show_date);
+      const sameDate = toDateInputValue(getShowtimeDate(st)) === formData.show_date;
 
       if (sameStudio && sameDate) {
         const startA = formData.start_time; // Waktu mulai input baru (cth: "14:00")
         const endA = formData.end_time; // Waktu selesai input baru (cth: "16:00")
-        const startB = st.start_time; // Waktu mulai jadwal eksis (cth: "15:00")
-        const endB = st.end_time; // Waktu selesai jadwal eksis (cth: "17:00")
+        const startB = st.start_time || st.startTime; // Waktu mulai jadwal eksis (cth: "15:00")
+        const endB = st.end_time || st.endTime; // Waktu selesai jadwal eksis (cth: "17:00")
 
         // Rumus Overlap: Jadwal bentrok jika waktu mulai A sebelum waktu selesai B
         // DAN waktu selesai A setelah waktu mulai B
@@ -208,7 +228,7 @@ const ShowtimeForm = ({ showtimeToEdit, showtimes = [], onClose, onSave }) => {
                     (movie) =>
                       movie.release === true ||
                       (showtimeToEdit &&
-                        movie._id === showtimeToEdit.movie?._id),
+                        movie._id === getShowtimeMovieId(showtimeToEdit)),
                   )
                   .map((movie) => (
                     <option key={movie._id} value={movie._id}>
