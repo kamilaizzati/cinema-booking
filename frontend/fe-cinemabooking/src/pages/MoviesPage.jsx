@@ -99,12 +99,12 @@ export default function MoviesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-10">
-          <p className="section-eyebrow mb-3">M.Tix-style Browse</p>
+          <p className="section-eyebrow mb-3">Browse Movie</p>
           <h1 className="text-4xl font-display font-bold text-white mb-4">
-            Film & Jadwal Tayang
+            Movie and Showtime
           </h1>
           <p className="text-slate-400 text-lg max-w-2xl">
-            Lihat semua film yang sedang tayang dalam katalog, lalu buka detail atau pilih tiket.
+            Browse all currently playing movies in the catalog, then view details or choose your tickets.
           </p>
         </div>
 

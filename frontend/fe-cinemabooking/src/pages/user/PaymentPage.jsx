@@ -14,25 +14,25 @@ const paymentOptions = [
         id: 'qris',
         label: 'QRIS',
         icon: QrCode,
-        instruction: 'Bayar melalui aplikasi mobile banking atau e-wallet yang mendukung QRIS.',
+        instruction: 'Pay via mobile banking app or e-wallet that supports QRIS.',
     },
     {
         id: 'wallet',
         label: 'E-wallet',
         icon: Wallet,
-        instruction: 'Bayar menggunakan GoPay, OVO, DANA, atau ShopeePay.',
+        instruction: 'Pay using GoPay, OVO, DANA, or ShopeePay.',
     },
     {
         id: 'va',
         label: 'Virtual Account',
         icon: Landmark,
-        instruction: 'Transfer melalui Virtual Account dari bank yang Anda gunakan.',
+        instruction: 'Transfer payment through a Virtual Account from your selected bank',
     },
     {
         id: 'card',
         label: 'Credit Card',
         icon: CreditCard,
-        instruction: 'Bayar menggunakan kartu kredit atau debit berlogo Visa, Mastercard, atau JCB.',
+        instruction: 'Pay using a Visa, MasterCard, or JCB credit or debit card. ',
     },
 ];
 
@@ -138,7 +138,7 @@ export default function PaymentPage() {
         <div className="mb-8">
           <p className="section-eyebrow mb-2">Checkout</p>
           <h1 className="text-3xl font-bold font-display">Complete Payment</h1>
-          <p className="mt-2 text-slate-400">Pilih metode yang akan digunakan untuk membayar. Ini hanya simulasi pembayaran.</p>
+          <p className="mt-2 text-slate-400">Choose a payment method</p>
         </div>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[1.1fr_0.9fr]">
           {/* Payment Form */}
@@ -157,13 +157,13 @@ export default function PaymentPage() {
             <div className="space-y-4">
               <div className="rounded-lg border border-dashed border-white/15 bg-dark-950 p-6 text-center">
                 <PaymentIcon className="mx-auto mb-4 h-12 w-12 text-accent-400"/>
-                <h3 className="font-semibold">Bayar dengan {selectedPaymentOption.label}</h3>
+                <h3 className="font-semibold">Pay with {selectedPaymentOption.label}</h3>
                 <p className="mt-2 text-sm text-slate-400">{selectedPaymentOption.instruction}</p>
-                <p className="mt-3 text-xs text-slate-500">Ini adalah simulasi. Tidak ada pembayaran nyata atau data pembayaran yang diproses.</p>
+                <p className="mt-3 text-xs text-slate-500">This is a simulation. No actual payment or payment data will be processed.</p>
               </div>
               <div className="flex items-center gap-2 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
                 <ShieldCheck className="h-4 w-4"/>
-                Metode ini hanya dicatat sebagai pilihan pembayaran pada transaksi dummy.
+                This method is only recorded as a payment option for the dummy transaction.
               </div>
             </div>
           </div>
