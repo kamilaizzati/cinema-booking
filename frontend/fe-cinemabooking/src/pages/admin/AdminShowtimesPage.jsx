@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { Plus, Edit, Trash2, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import toast from "react-hot-toast";
 import { movieService } from "@/services/movieService";
@@ -81,7 +81,7 @@ const ShowtimeForm = ({ showtimeToEdit, showtimes = [], onClose, onSave }) => {
     } else {
       reset();
     }
-  }, [showtimeToEdit, reset]);
+  }, [showtimeToEdit, reset, movies, halls, bioskop]);
 
   // 👈 4. Otomatis RESET pilihan Studio jika user mengubah Cinema/Bioskop di tengah jalan
   useEffect(() => {
@@ -415,13 +415,20 @@ export default function AdminShowtimesPage() {
   const [movieFilter, setMovieFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [seatCounts, setSeatCounts] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [movieFilter, dateFilter]);
+
   useEffect(() => {
     fetchShowtimes();
   }, []);
   const fetchShowtimes = async () => {
     setLoading(true);
     try {
-      const data = await showtimeService.getShowtimes();
+      const data = await showtimeService.getShowtimes({ limit: 1000 });
       console.log("Showtimes API:", data);
       setShowtimes(data || []);
       const counts = await Promise.all(
@@ -473,6 +480,49 @@ export default function AdminShowtimesPage() {
       !dateFilter || showtime.show_date.startsWith(dateFilter);
     return matchesMovie && matchesDate;
   });
+
+  const totalItems = filteredShowtimes.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredShowtimes.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Hitung range halaman dengan ellipsis (contoh: 1 2 3 ... 8 9 10)
+  const getPaginationRange = () => {
+    const totalNumbers = 7; // Jumlah tombol halaman maksimum di luar panah
+    if (totalPages <= totalNumbers) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const leftSiblingIndex = Math.max(currentPage - 1, 1);
+    const rightSiblingIndex = Math.min(currentPage + 1, totalPages);
+
+    const shouldShowLeftDots = leftSiblingIndex > 2;
+    const shouldShowRightDots = rightSiblingIndex < totalPages - 2;
+
+    const firstPageIndex = 1;
+    const lastPageIndex = totalPages;
+
+    if (!shouldShowLeftDots && shouldShowRightDots) {
+      let leftItemCount = 4;
+      let leftRange = Array.from({ length: leftItemCount }, (_, i) => i + 1);
+      return [...leftRange, "...", lastPageIndex];
+    }
+
+    if (shouldShowLeftDots && !shouldShowRightDots) {
+      let rightItemCount = 4;
+      let rightRange = Array.from({ length: rightItemCount }, (_, i) => totalPages - rightItemCount + i + 1);
+      return [firstPageIndex, "...", ...rightRange];
+    }
+
+    if (shouldShowLeftDots && shouldShowRightDots) {
+      let middleRange = [currentPage - 1, currentPage, currentPage + 1];
+      return [firstPageIndex, "...", ...middleRange, "...", lastPageIndex];
+    }
+    return [];
+  };
+
+  const pageNumbers = getPaginationRange();
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -578,7 +628,7 @@ export default function AdminShowtimesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-dark-700">
-                {filteredShowtimes.map((showtime) => (
+                {currentItems.map((showtime) => (
                   <tr key={showtime._id} className="hover:bg-dark-800/50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-white max-w-xs truncate">
@@ -631,6 +681,59 @@ export default function AdminShowtimesPage() {
               </tbody>
             </table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-dark-700 px-6 py-4 bg-dark-800/20">
+              <div className="text-sm text-slate-400">
+                Showing <span className="font-semibold text-white">{indexOfFirstItem + 1}</span> to{" "}
+                <span className="font-semibold text-white">
+                  {Math.min(indexOfLastItem, totalItems)}
+                </span>{" "}
+                of <span className="font-semibold text-white">{totalItems}</span> showtimes
+              </div>
+              <div className="inline-flex rounded-lg border border-dark-700 overflow-hidden bg-dark-900 shadow-sm divide-x divide-dark-700">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 text-slate-400 hover:bg-dark-800 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                {pageNumbers.map((page, index) => {
+                  if (page === "...") {
+                    return (
+                      <span
+                        key={`dots-${index}`}
+                        className="px-4 py-2 text-slate-500 bg-dark-900 inline-flex items-center text-sm font-medium select-none"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-4 py-2 text-sm font-medium transition ${
+                        currentPage === page
+                          ? "bg-indigo-600 text-white font-semibold"
+                          : "bg-dark-900 text-slate-300 hover:bg-dark-800"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-2 text-slate-400 hover:bg-dark-800 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
