@@ -20,9 +20,9 @@ export default function AdminLoginPage() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const { error } = await adminSignIn(data.username, data.password);
+      const { error } = await adminSignIn(data.email, data.password);
       if (error) {
-        toast.error("Invalid username or password");
+        toast.error("Invalid email or password");
       } else {
         toast.success("Welcome back, Admin!");
         navigate(from, { replace: true });
@@ -50,22 +50,26 @@ export default function AdminLoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label
-                htmlFor="username"
+                htmlFor="email"
                 className="block text-sm font-medium text-slate-300 mb-2"
               >
-                Username
+                Admin Email
               </label>
               <input
-                {...register("username", {
-                  required: "Username is required",
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address",
+                  },
                 })}
-                type="text"
+                type="email"
                 className="input"
-                placeholder="Enter admin username"
+                placeholder="Enter admin email"
               />
-              {errors.username && (
+              {errors.email && (
                 <p className="mt-1 text-sm text-red-400">
-                  {errors.username.message}
+                  {errors.email.message}
                 </p>
               )}
             </div>

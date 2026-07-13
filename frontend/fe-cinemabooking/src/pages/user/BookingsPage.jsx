@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Eye, X } from 'lucide-react';
+import { Calendar, Clock, MapPin, Eye, X, CreditCard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { bookingService } from '@/services/bookingService';
+import { transactionService } from '@/services/transactionService';
 export default function BookingsPage() {
     const { user } = useAuth();
     const [bookings, setBookings] = useState([]);
+    const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (user) {
@@ -18,8 +20,12 @@ export default function BookingsPage() {
         if (!user)
             return;
         try {
-            const data = await bookingService.getMyBookings(user.id);
-            setBookings(data || []);
+            const [bookingsData, transactionsData] = await Promise.all([
+                bookingService.getMyBookings(user.id),
+                transactionService.getHistory().catch(() => [])
+            ]);
+            setBookings(bookingsData || []);
+            setTransactions(transactionsData || []);
         }
         catch (error) {
             console.error('Error fetching bookings:', error);
@@ -70,7 +76,9 @@ export default function BookingsPage() {
               Browse Movies
             </Link>
           </div>) : (<div className="space-y-6">
-            {bookings.map((booking) => (<div key={booking._id} className="card p-6">
+            {bookings.map((booking) => {
+                const transaction = transactions.find(t => (t.bookingId?._id || t.bookingId) === booking._id);
+                return (<div key={booking._id} className="card p-6">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex items-start space-x-4 mb-4 lg:mb-0">
                     <img src={booking.showtime?.movie?.poster || booking.showtime?.movie?.poster_url || 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=100&h=150&fit=crop'} alt={booking.showtime?.movie?.title} className="w-16 h-24 object-cover rounded-lg"/>
@@ -97,13 +105,24 @@ export default function BookingsPage() {
                           <span>Seats: {booking.selected_seats?.join(', ')}</span>
                         </div>
                       </div>
-                      <div className="mt-3 flex items-center space-x-4">
+                      <div className="mt-3 flex flex-wrap items-center gap-4">
                         <span className={getStatusBadge(booking.status)}>
                           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                         </span>
                         <span className="text-lg font-semibold text-primary-400">
                           IDR {booking.total_amount.toLocaleString()}
                         </span>
+                        {transaction && (
+                          <span className="flex items-center gap-1.5 text-sm text-slate-400 bg-dark-950/50 px-2.5 py-1 rounded-full border border-white/5">
+                            <CreditCard className="h-3.5 w-3.5 text-accent-400"/>
+                            <span>{transaction.paymentMethod}</span>
+                            {transaction.status === 'success' && (
+                              <span className="text-[10px] bg-green-500/20 text-green-400 font-bold px-1.5 py-0.5 rounded uppercase">
+                                Paid
+                              </span>
+                            )}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -119,7 +138,8 @@ export default function BookingsPage() {
                       </button>)}
                   </div>
                 </div>
-              </div>))}
+              </div>);
+            })}
           </div>)}
       </div>
     </div>);

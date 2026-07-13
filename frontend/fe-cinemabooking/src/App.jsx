@@ -3,6 +3,7 @@ import { useAuth } from "./contexts/AuthContext";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/admin/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
 // Public pages
 import HomePage from "./pages/HomePage";
 import MoviesPage from "./pages/MoviesPage";
@@ -38,7 +39,9 @@ import {
 function App() {
   useAuth();
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       {/* Public and User routes */}
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
@@ -175,6 +178,7 @@ function App() {
         />
       </Route>
     </Routes>
-  );
+  </>
+);
 }
 export default App;
