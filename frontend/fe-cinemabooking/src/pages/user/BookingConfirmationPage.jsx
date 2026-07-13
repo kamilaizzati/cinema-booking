@@ -68,8 +68,8 @@ export default function BookingConfirmationPage() {
                 </div>
                 <div className="my-5 border-t border-dashed border-white/20"/>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  <div><p className="text-sm text-slate-400">Cinema</p><p className="flex items-center gap-1 font-semibold"><MapPin className="h-4 w-4 text-accent-400"/> Grand Indonesia</p></div>
-                  <div><p className="text-sm text-slate-400">Hall</p><p className="font-semibold">{booking.showtime.hall.hall_name}</p></div>
+                  <div><p className="text-sm text-slate-400">Cinema</p><p className="flex items-center gap-1 font-semibold"><MapPin className="h-4 w-4 text-accent-400"/> {booking.showtime.cinema_name || booking.showtime.bioskop?.name || '-'}</p></div>
+                  <div><p className="text-sm text-slate-400">Studio</p><p className="font-semibold">{booking.showtime.hall?.hall_name || '-'}</p></div>
                   <div><p className="text-sm text-slate-400">Date</p><p className="flex items-center gap-1 font-semibold"><CalendarDays className="h-4 w-4 text-accent-400"/> {new Date(booking.showtime.show_date).toLocaleDateString()}</p></div>
                   <div><p className="text-sm text-slate-400">Time</p><p className="font-semibold">{booking.showtime.start_time}</p></div>
                   <div><p className="text-sm text-slate-400">Seats</p><p className="font-semibold">{booking.selected_seats.join(', ')}</p></div>

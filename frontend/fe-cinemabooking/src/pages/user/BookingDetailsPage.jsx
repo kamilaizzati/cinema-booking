@@ -59,6 +59,15 @@ export default function BookingDetailsPage() {
         const parsedDate = new Date(date);
         return Number.isNaN(parsedDate.getTime()) ? '-' : parsedDate.toLocaleString('id-ID');
     };
+    const getCinemaName = () =>
+        booking.showtime?.cinema_name ||
+        booking.showtime?.bioskop?.name ||
+        booking.showtime?.cinema?.name ||
+        '-';
+    const getStudioName = () =>
+        booking.showtime?.hall?.hall_name ||
+        booking.showtime?.studio ||
+        '-';
     const handleDownloadPdf = () => {
         const bookingDate = formatDateTime(transaction?.paymentDate);
         const showDate = booking.showtime?.show_date
@@ -74,7 +83,8 @@ export default function BookingDetailsPage() {
             `Customer: ${booking.user?.fullName || '-'}`,
             `Email: ${booking.user?.email || '-'}`,
             `Movie: ${booking.showtime?.movie?.title || '-'}`,
-            `Hall: ${booking.showtime?.hall?.hall_name || '-'}`,
+            `Cinema: ${getCinemaName()}`,
+            `Studio: ${getStudioName()}`,
             `Show Date: ${showDate}`,
             `Show Time: ${booking.showtime?.start_time || '-'}`,
             `Seats: ${booking.selected_seats?.join(', ') || '-'}`,
@@ -198,13 +208,20 @@ export default function BookingDetailsPage() {
                   <div className="flex items-center space-x-3">
                     <MapPin className="h-6 w-6 text-primary-400"/>
                     <div>
-                      <p className="text-sm text-slate-400">Hall</p>
-                      <p className="font-semibold">{booking.showtime?.hall?.hall_name}</p>
+                      <p className="text-sm text-slate-400">Cinema</p>
+                      <p className="font-semibold">{getCinemaName()}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="flex items-center space-x-3">
+                    <MapPin className="h-6 w-6 text-primary-400"/>
+                    <div>
+                      <p className="text-sm text-slate-400">Studio</p>
+                      <p className="font-semibold">{getStudioName()}</p>
+                    </div>
+                  </div>
                   <div className="flex items-center space-x-3">
                     <Calendar className="h-6 w-6 text-primary-400"/>
                     <div>
@@ -229,11 +246,13 @@ export default function BookingDetailsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="flex items-center space-x-3">
-                    <Users className="h-6 w-6 text-primary-400"/>
-                    <div>
-                      <p className="text-sm text-slate-400">Seats</p>
-                      <p className="font-semibold">{booking.selected_seats?.join(', ')}</p>
+                  <div>
+                    <div className="flex items-center space-x-3">
+                      <Users className="h-6 w-6 text-primary-400"/>
+                      <div>
+                        <p className="text-sm text-slate-400">Seats</p>
+                        <p className="font-semibold">{booking.selected_seats?.join(', ')}</p>
+                      </div>
                     </div>
                   </div>
                   <div>
