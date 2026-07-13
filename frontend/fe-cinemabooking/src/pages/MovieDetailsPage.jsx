@@ -180,7 +180,12 @@ export default function MovieDetailsPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold mb-2">Cast</h2>
-                  <p className="text-slate-300">{movie.cast?.join(', ') || 'To be announced'}</p>
+                  <p className="text-slate-300">
+
+                    {movie.cast && movie.cast.length > 0
+                    ? movie.cast.join(', ')
+                    : 'To be announced'}
+                  </p>
                 </div>
               </div>
 

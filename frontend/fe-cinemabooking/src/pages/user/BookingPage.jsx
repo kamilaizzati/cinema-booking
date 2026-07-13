@@ -427,98 +427,108 @@ export default function BookingPage() {
             <h3 className="mb-4 text-lg font-semibold border-t border-white/10 pt-6">
               Available Schedules
             </h3>
-            {filteredShowtimes.length > 0 ? (
-              <div className="flex flex-wrap gap-4">
-                {filteredShowtimes.map((showtime) => {
-                  // 1. Kalkulasi Jumlah Kursi & Ketersediaan
-                  const totalSeats =
-                    showtime.hall?.total_seats ||
-                    showtime.hall?.layout_rows *
-                      showtime.hall?.layout_columns ||
-                    0;
-                  const bookedCount = showtime.booked_seats?.length || 0;
-                  const availableSeats = totalSeats - bookedCount;
+            {selectedLocation && selectedBioskop ? (
+              filteredShowtimes.length > 0 ? (
+                <div className="flex flex-wrap gap-4">
+                  {filteredShowtimes.map((showtime) => {
+                    // 1. Kalkulasi Jumlah Kursi & Ketersediaan
+                    const totalSeats =
+                      showtime.hall?.total_seats ||
+                      showtime.hall?.layout_rows *
+                        showtime.hall?.layout_columns ||
+                      0;
+                    const bookedCount = showtime.booked_seats?.length || 0;
+                    const availableSeats = totalSeats - bookedCount;
 
-                  // 2. Tentukan Status Penjualan
-                  const isSoldOut = availableSeats <= 0;
+                    // 2. Tentukan Status Penjualan
+                    const isSoldOut = availableSeats <= 0;
 
-                  return (
-                    <button
-                      key={showtime._id}
-                      disabled={isSoldOut} // 👈 Nonaktifkan tombol jika Sold Out
-                      className={`relative min-w-48 rounded-lg border p-4 text-left transition ${
-                        isSoldOut
-                          ? "border-red-500/30 bg-red-900/20 cursor-not-allowed opacity-60" // Tampilan kalau habis
-                          : selectedShowtime?._id === showtime._id
-                            ? "border-primary-500 bg-primary-600 text-white" // Tampilan kalau dipilih
-                            : "border-white/10 bg-dark-950 text-slate-200 hover:border-primary-500/60"
-                      }`}
-                      onClick={() => {
-                        if (!isSoldOut) {
-                          if (
-                            !showtime.hall?.layout_rows ||
-                            !showtime.hall?.layout_columns
-                          ) {
-                            toast.error(
-                              "Studio untuk jadwal ini tidak tersedia. Pilih jadwal lain.",
-                            );
-                            return;
+                    return (
+                      <button
+                        key={showtime._id}
+                        disabled={isSoldOut} // 👈 Nonaktifkan tombol jika Sold Out
+                        className={`relative min-w-48 rounded-lg border p-4 text-left transition ${
+                          isSoldOut
+                            ? "border-red-500/30 bg-red-900/20 cursor-not-allowed opacity-60" // Tampilan kalau habis
+                            : selectedShowtime?._id === showtime._id
+                              ? "border-primary-500 bg-primary-600 text-white" // Tampilan kalau dipilih
+                              : "border-white/10 bg-dark-950 text-slate-200 hover:border-primary-500/60"
+                        }`}
+                        onClick={() => {
+                          if (!isSoldOut) {
+                            if (
+                              !showtime.hall?.layout_rows ||
+                              !showtime.hall?.layout_columns
+                            ) {
+                              toast.error(
+                                "Studio untuk jadwal ini tidak tersedia. Pilih jadwal lain.",
+                              );
+                              return;
+                            }
+                            setSelectedShowtime(showtime);
+                            setSelectedSeats([]);
                           }
-                          setSelectedShowtime(showtime);
-                          setSelectedSeats([]);
-                        }
-                      }}
-                    >
-                      {/* 👇 TANDA (BADGE) INDIKATOR KURSI */}
-                      <div className="absolute top-3 right-3">
-                        {bookedCount === 0 ? (
-                          <span className="bg-green-500/20 text-green-400 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">
-                            Empty
-                          </span>
-                        ) : isSoldOut ? (
-                          <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">
-                            Sold Out
-                          </span>
-                        ) : availableSeats <= 10 ? (
-                          <span className="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">
-                            Almost Full
-                          </span>
-                        ) : (
-                          <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">
-                            Filling
-                          </span>
-                        )}
-                      </div>
+                        }}
+                      >
+                        {/* 👇 TANDA (BADGE) INDIKATOR KURSI */}
+                        <div className="absolute top-3 right-3">
+                          {bookedCount === 0 ? (
+                            <span className="bg-green-500/20 text-green-400 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">
+                              Empty
+                            </span>
+                          ) : isSoldOut ? (
+                            <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">
+                              Sold Out
+                            </span>
+                          ) : availableSeats <= 10 ? (
+                            <span className="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">
+                              Almost Full
+                            </span>
+                          ) : (
+                            <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide">
+                              Filling
+                            </span>
+                          )}
+                        </div>
 
-                      <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide opacity-75">
-                        <Clock className="h-4 w-4" />
-                        {showtime.start_time}
-                      </span>
-                      <span className="block text-lg font-bold mb-1 truncate max-w-[130px]">
-                        {showtime.hall?.hall_name ||
-                          showtime.studio ||
-                          "Studio"}
-                      </span>
-                      <span className="text-sm font-medium text-accent-400">
-                        IDR {showtime.ticket_price.toLocaleString()}
-                      </span>
+                        <span className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide opacity-75">
+                          <Clock className="h-4 w-4" />
+                          {showtime.start_time}
+                        </span>
+                        <span className="block text-lg font-bold mb-1 truncate max-w-[130px]">
+                          {showtime.hall?.hall_name ||
+                            showtime.studio ||
+                            "Studio"}
+                        </span>
+                        <span className="text-sm font-medium text-accent-400">
+                          IDR {showtime.ticket_price.toLocaleString()}
+                        </span>
 
-                      {/* 👇 Teks Info Sisa Kursi */}
-                      <div className="mt-3 pt-2 border-t border-white/10 text-xs text-slate-400 font-medium">
-                        {isSoldOut
-                          ? "0 seats left"
-                          : `${availableSeats} seats left`}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                        {/* 👇 Teks Info Sisa Kursi */}
+                        <div className="mt-3 pt-2 border-t border-white/10 text-xs text-slate-400 font-medium">
+                          {isSoldOut
+                            ? "0 seats left"
+                            : `${availableSeats} seats left`}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-lg border border-white/5 bg-white/5 p-8 text-center text-slate-400">
+                  <Film className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                  <p>No showtimes available for the selected filters.</p>
+                  <p className="text-sm mt-1">
+                    Try selecting a different date or cinema.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="rounded-lg border border-white/5 bg-white/5 p-8 text-center text-slate-400">
-                <Film className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                <p>No showtimes available for the selected filters.</p>
-                <p className="text-sm mt-1">
-                  Try selecting a different date or cinema.
+                <MapPin className="h-12 w-12 mx-auto mb-3 opacity-20 text-accent-400" />
+                <p className="text-white font-semibold">Please Select Location and Cinema</p>
+                <p className="text-sm text-slate-400 mt-1">
+                  Choose a location and cinema above to view available showtimes.
                 </p>
               </div>
             )}
