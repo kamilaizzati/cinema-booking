@@ -4,6 +4,7 @@ export default function MovieCard({ movie, hasShowtimes = true }) {
     const isComingSoon = movie.status === 'coming_soon';
     const canBook = !isComingSoon && hasShowtimes;
     const releaseYear = new Date(movie.release_date).getFullYear();
+    const genres = Array.isArray(movie.genre) ? movie.genre.join(', ') : movie.genre;
     return (<div className="movie-card group flex h-full flex-col">
       <div className="relative aspect-[2/3] flex-none overflow-hidden">
         <img src={movie.poster_url || 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop'} alt={movie.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
@@ -46,7 +47,7 @@ export default function MovieCard({ movie, hasShowtimes = true }) {
           </div>
         </div>
         <div className="mb-4 flex min-h-[2rem] flex-wrap content-start gap-2">
-          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">{movie.genre}</span>
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">{genres}</span>
           {isComingSoon && (<span className="rounded-full bg-accent-500/15 px-3 py-1 text-xs font-semibold text-accent-300">
               {new Date(movie.release_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>)}

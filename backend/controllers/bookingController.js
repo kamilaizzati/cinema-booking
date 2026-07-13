@@ -51,124 +51,81 @@ const getBookingById = async (req, res) => {
 
 const createBooking = async (req, res) => {
   try {
-    const { userId, movieId, showtimeId, seats } = req.body;
-    // seats = ["A1", "A2"] — user kirim kode kursi, bukan ObjectId
+    const { userId, movieId, showtimeId, seats } = req.body; // seats: ["A1", "A2"]
 
-    // 1. Validasi input dasar
-    if (!userId || !movieId || !showtimeId || !seats || seats.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "userId, movieId, showtimeId, dan seats wajib diisi",
-      });
-    }
-
-    // 2. Cek tidak ada duplikat pada request
-    const uniqueSeats = [...new Set(seats)];
-    if (uniqueSeats.length !== seats.length) {
-      return res.status(400).json({
-        success: false,
-        message: "Terdapat kursi duplikat pada request",
-      });
-    }
-
-    // 3. Cek showtime ada dan aktif
+    // 1. CEK SHOWTIME
     const showtime = await Showtime.findById(showtimeId);
     if (!showtime) {
-      return res.status(404).json({
-        success: false,
-        message: "Showtime tidak ditemukan",
-      });
-    }
-    if (!showtime.isActive) {
-      return res.status(400).json({
-        success: false,
-        message: "Showtime sudah tidak aktif",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Jadwal tayang tidak ditemukan" });
     }
 
-    // 4. Cari ObjectId kursi berdasarkan studioId + kode kursi yang dikirim user
+    // 2. CARI OBJECT ID KURSI BERDASARKAN KODE (A1, A2) DI STUDIO YANG SAMA
     const seatDocs = await Seat.find({
       studioId: showtime.studioId,
-      code: { $in: seats },
+      code: { $in: seats }, // Mencari semua kursi yang ada di array string
     });
 
-    // 5. Validasi: semua kode kursi harus valid di studio ini
-    if (seatDocs.length !== seats.length) {
-      const validCodes = seatDocs.map((s) => s.code);
-      const invalidCodes = seats.filter((s) => !validCodes.includes(s));
+    // Ambil array ObjectId aslinya
+    const seatIds = seatDocs.map((seat) => seat._id.toString());
+
+    // Validasi apakah kursi yang diklik benar-benar ada di database
+    if (seatIds.length !== seats.length) {
       return res.status(400).json({
         success: false,
-        message: "Kursi tidak valid untuk studio ini",
-        invalidSeats: invalidCodes,
+        message: "Beberapa kursi tidak valid atau tidak ditemukan",
       });
     }
 
-    const seatIds = seatDocs.map((s) => s._id); // [ObjectId, ObjectId]
-
-    // 6. ATOMIC: Kunci kursi pakai ObjectId — cek & update sekaligus
-    const updatedShowtime = await Showtime.findOneAndUpdate(
-      {
-        _id: showtimeId,
-        bookedSeats: { $nin: seatIds }, // Syarat: tidak ada ObjectId yang bentrok
-      },
-      {
-        $push: { bookedSeats: { $each: seatIds } },
-      },
-      { new: true }
+    // Validasi apakah kursi sudah di-booking sebelumnya oleh orang lain (Mencegah bentrok)
+    const alreadyBooked = seatIds.some((id) =>
+      showtime.bookedSeats.includes(id),
     );
-
-    // Jika null → ada kursi yang sudah dipesan (race condition dicegah di sini)
-    if (!updatedShowtime) {
-      const alreadyBooked = seatDocs
-        .filter((s) => showtime.bookedSeats.some((b) => b.equals(s._id)))
-        .map((s) => s.code);
-
-      return res.status(409).json({
+    if (alreadyBooked) {
+      return res.status(400).json({
         success: false,
-        message: "Salah satu atau lebih kursi sudah dipesan",
-        conflictSeats: alreadyBooked,
+        message: "Mohon maaf, kursi tersebut baru saja dipesan oleh orang lain",
       });
     }
 
-    // 7. Hitung total harga
+    // 3. KALKULASI TOTAL HARGA DI BACKEND (Lebih aman dari dimanipulasi frontend)
     const totalPrice = seats.length * showtime.price;
 
-    // 8. Buat booking dengan ObjectId kursi
+    // 4. BIKIN DATA BOOKING BARU (Status: pending)
     const booking = await Booking.create({
       userId,
       movieId,
       showtimeId,
-      seats: seatIds, // simpan ObjectId, bukan String
+      seats: seatIds, // Memasukkan ObjectId kursi
       totalPrice,
-      status: "pending",
     });
 
-    // 9. Populate sebelum return agar response langsung informatif
-    await booking.populate("seats");
+    // 5. UPDATE SHOWTIME BOOKED SEATS
+    // Dorong semua ObjectId kursi baru ke array bookedSeats milik Showtime
+    showtime.bookedSeats.push(...seatIds);
+    await showtime.save();
 
     res.status(201).json({
       success: true,
-      message: "Booking berhasil dibuat. Silakan lanjutkan ke pembayaran.",
+      message: "Booking berhasil dibuat!",
       data: booking,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Terjadi kesalahan server saat membuat booking",
+      error: error.message,
     });
   }
 };
 
 const updateBooking = async (req, res) => {
   try {
-    const booking = await Booking.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const booking = await Booking.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!booking) {
       return res.status(404).json({

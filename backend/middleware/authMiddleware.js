@@ -36,6 +36,15 @@ exports.protect = async (req, res, next) => {
     // Kita gunakan .select('-password') agar data password tidak ikut terbawa
     req.user = await User.findById(decoded.id).select("-password");
 
+    // Token masih dapat lolos verifikasi walaupun akun sudah dihapus.
+    // Jangan teruskan nilai null ke controller karena akan menghasilkan 500.
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Sesi login tidak lagi valid. Silakan login kembali.",
+      });
+    }
+
     // Lanjut ke controller (misalnya getMe)
     next();
   } catch (error) {

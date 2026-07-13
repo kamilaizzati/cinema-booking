@@ -1,8 +1,13 @@
-import api from './api';
+import api from "./api";
 
 export const bioskopService = {
-  async getBioskop() {
-    const { data } = await api.get('/bioskop');
-    return data.data || data || [];
+  getBioskops: async () => {
+    try {
+      const response = await api.get("/bioskop");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching bioskops:", error);
+      throw error;
+    }
   },
 };

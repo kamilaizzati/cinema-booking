@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { protect } = require("../middleware/authMiddleware");
 
 const {
   getBookings,
@@ -9,13 +10,13 @@ const {
   deleteBooking,
 } = require("../controllers/bookingController");
 
-router.get("/", getBookings);
-router.get("/:id", getBookingById);
+router.get("/", protect, getBookings);
+router.get("/:id", protect, getBookingById);
 
-router.post("/", createBooking);
+router.post("/", protect, createBooking);
 
-router.put("/:id", updateBooking);
+router.put("/:id", protect, updateBooking);
 
-router.delete("/:id", deleteBooking);
+router.delete("/:id", protect, deleteBooking);
 
 module.exports = router;

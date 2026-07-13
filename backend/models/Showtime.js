@@ -14,12 +14,6 @@ const showtimeSchema = new mongoose.Schema(
       required: [true, "Bioskop wajib dipilih"],
     },
 
-    studio: {
-      type: String,
-      required: [true, "Studio wajib diisi"],
-      trim: true,
-    },
-
     studioId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Studio",
@@ -34,6 +28,11 @@ const showtimeSchema = new mongoose.Schema(
     startTime: {
       type: String,
       required: [true, "Jam tayang wajib diisi"],
+    },
+
+    endTime: {
+      type: String,
+      required: [true, "Jam selesai wajib diisi"],
     },
 
     price: {
@@ -57,18 +56,20 @@ const showtimeSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-// Compound Index (agar tidak bisa membuat jadwal yang sama dua kali)
-showtimeSchema.index({
-    movieId:1,
-    bioskopId:1,
-    studio:1,
-    date:1,
-    startTime:1
-},{
-    unique:true
-});
+// Satu studio tidak boleh memiliki dua jadwal pada waktu yang sama.
+showtimeSchema.index(
+  {
+    bioskopId: 1,
+    studioId: 1,
+    date: 1,
+    startTime: 1,
+  },
+  {
+    unique: true,
+  },
+);
 
 module.exports = mongoose.model("Showtime", showtimeSchema);

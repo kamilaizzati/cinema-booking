@@ -42,7 +42,11 @@ export default function MoviesPage() {
             ]);
             setMovies(data || []);
             setShowtimeMovieIds(new Set((showtimes || []).map((showtime) => showtime.movie?._id).filter(Boolean)));
-            const uniqueGenres = [...new Set(data?.map((movie) => movie.genre).filter(Boolean) || [])];
+            const uniqueGenres = [...new Set(
+                (data || []).flatMap((movie) =>
+                    Array.isArray(movie.genre) ? movie.genre : [movie.genre],
+                ).filter(Boolean),
+            )];
             setGenres(uniqueGenres);
         }
         catch (error) {
@@ -60,7 +64,11 @@ export default function MoviesPage() {
                 movie.description.toLowerCase().includes(searchTerm.toLowerCase()));
         }
         if (selectedGenre) {
-            filtered = filtered.filter(movie => movie.genre === selectedGenre);
+            filtered = filtered.filter(movie =>
+                Array.isArray(movie.genre)
+                    ? movie.genre.includes(selectedGenre)
+                    : movie.genre === selectedGenre,
+            );
         }
         if (selectedStatus !== 'all') {
             filtered = filtered.filter(movie => movie.status === selectedStatus);

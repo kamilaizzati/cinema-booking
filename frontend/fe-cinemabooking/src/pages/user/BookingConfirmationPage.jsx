@@ -58,7 +58,7 @@ export default function BookingConfirmationPage() {
                       E-ticket
                     </span>
                     <h2 className="text-2xl font-bold">{booking.showtime.movie.title}</h2>
-                    <p className="text-slate-400">{booking.showtime.movie.genre} • {booking.showtime.movie.duration} mins</p>
+                    <p className="text-slate-400">{Array.isArray(booking.showtime.movie.genre) ? booking.showtime.movie.genre.join(', ') : booking.showtime.movie.genre} • {booking.showtime.movie.duration} mins</p>
                   </div>
                   <div className="rounded-lg bg-white p-3">
                     <div className="grid h-24 w-24 grid-cols-5 gap-1">

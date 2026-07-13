@@ -1,6 +1,5 @@
 const Showtime = require("../models/Showtime");
 
-
 // GET /api/showtimes
 // Public
 // Mengambil seluruh showtime + search + filter + pagination
@@ -19,7 +18,7 @@ exports.getAllShowtimes = async (req, res) => {
 
     // Cari query yang tidak dikenal
     const invalidQuery = Object.keys(req.query).find(
-      (key) => !allowedQueries.includes(key)
+      (key) => !allowedQueries.includes(key),
     );
 
     if (invalidQuery) {
@@ -29,7 +28,7 @@ exports.getAllShowtimes = async (req, res) => {
         allowedQueries,
       });
     }
-    
+
     const {
       search,
       genre,
@@ -49,34 +48,30 @@ exports.getAllShowtimes = async (req, res) => {
 
     // Ambil seluruh showtime beserta relasinya
     let showtimes = await Showtime.find(query)
-        .populate("movieId")
-        .populate("studioId")
-        .populate({
-          path: "bioskopId",
-          populate: {
-            path: "locationId",
-          },
-        })
-        .sort({
-          date: 1,
-          time: 1,
-        });
+      .populate("movieId")
+      .populate("studioId")
+      .populate({
+        path: "bioskopId",
+        populate: {
+          path: "locationId",
+        },
+      })
+      .sort({
+        date: 1,
+        time: 1,
+      });
 
     // Search Judul Movie
     if (search) {
       showtimes = showtimes.filter((item) =>
-        item.movieId.title
-          .toLowerCase()
-          .includes(search.toLowerCase())
+        item.movieId.title.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
     // Filter Genre
     if (genre) {
       showtimes = showtimes.filter(
-        (item) =>
-          item.movieId.genre.toLowerCase() ===
-          genre.toLowerCase()
+        (item) => item.movieId.genre.toLowerCase() === genre.toLowerCase(),
       );
     }
 
@@ -85,16 +80,14 @@ exports.getAllShowtimes = async (req, res) => {
       showtimes = showtimes.filter(
         (item) =>
           item.bioskopId.locationId.city.toLowerCase() ===
-          location.toLowerCase()
+          location.toLowerCase(),
       );
     }
 
     // Filter Bioskop
     if (bioskop) {
       showtimes = showtimes.filter(
-        (item) =>
-          item.bioskopId.name.toLowerCase() ===
-          bioskop.toLowerCase()
+        (item) => item.bioskopId.name.toLowerCase() === bioskop.toLowerCase(),
       );
     }
 
@@ -106,10 +99,7 @@ exports.getAllShowtimes = async (req, res) => {
 
     const startIndex = (pageNumber - 1) * limitNumber;
 
-    const paginatedData = showtimes.slice(
-      startIndex,
-      startIndex + limitNumber
-    );
+    const paginatedData = showtimes.slice(startIndex, startIndex + limitNumber);
 
     res.status(200).json({
       success: true,
@@ -119,7 +109,6 @@ exports.getAllShowtimes = async (req, res) => {
       totalPages: Math.ceil(totalItems / limitNumber),
       data: paginatedData,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -197,8 +186,10 @@ exports.getShowtimeById = async (req, res) => {
 // Mengambil daftar kursi yang sudah dipesan
 exports.getSeatAvailability = async (req, res) => {
   try {
-    const showtime = await Showtime.findById(req.params.id)
-      .populate("bookedSeats", "code"); // populate hanya field code
+    const showtime = await Showtime.findById(req.params.id).populate(
+      "bookedSeats",
+      "code",
+    ); // populate hanya field code
 
     if (!showtime) {
       return res.status(404).json({
@@ -220,7 +211,6 @@ exports.getSeatAvailability = async (req, res) => {
   }
 };
 
-
 // POST /api/showtimes
 // Admin
 // Menambahkan jadwal tayang baru
@@ -231,6 +221,7 @@ exports.createShowtime = async (req, res) => {
       bioskopId,
       date,
       startTime,
+      endTime,
       studio,
       studioId,
       price,
@@ -238,7 +229,16 @@ exports.createShowtime = async (req, res) => {
     } = req.body;
 
     // Validasi field wajib
-    if (!movieId || !bioskopId || !date || !startTime || !studio || !studioId || !price) {
+    if (
+      !movieId ||
+      !bioskopId ||
+      !date ||
+      !startTime ||
+      !endTime ||
+      !studio ||
+      !studioId ||
+      !price
+    ) {
       return res.status(400).json({
         success: false,
         message: "Semua field wajib harus diisi",
@@ -252,6 +252,7 @@ exports.createShowtime = async (req, res) => {
       studioId,
       date,
       startTime,
+      endTime,
     });
 
     if (existingShowtime) {
@@ -267,6 +268,7 @@ exports.createShowtime = async (req, res) => {
       studioId,
       date,
       startTime,
+      endTime,
       studio,
       price,
       bookedSeats: bookedSeats || [],
@@ -291,14 +293,10 @@ exports.createShowtime = async (req, res) => {
 // Memperbarui jadwal tayang
 exports.updateShowtime = async (req, res) => {
   try {
-    const showtime = await Showtime.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const showtime = await Showtime.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!showtime) {
       return res.status(404).json({

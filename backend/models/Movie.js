@@ -27,10 +27,17 @@ const movieSchema = new mongoose.Schema(
     description: {
       type: String,
     },
+    trailer: {
+      type: String,
+    },
+    release_date: {
+      type: Date,
+      required: true, // Ubah jadi false jika tidak wajib diisi
+    },
     release: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   { timestamps: true },
 );

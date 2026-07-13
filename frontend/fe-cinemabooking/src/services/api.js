@@ -1,9 +1,9 @@
-const TOKEN_KEY = 'cinematix_token';
+const TOKEN_KEY = "cinematix_token";
 
 const buildUrl = (path, params) => {
   const url = new URL(`/api${path}`, window.location.origin);
   Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
+    if (value !== undefined && value !== null && value !== "") {
       url.searchParams.set(key, value);
     }
   });
@@ -11,26 +11,36 @@ const buildUrl = (path, params) => {
 };
 
 const request = async (method, path, body, config = {}) => {
-  const headers = { 'Content-Type': 'application/json', ...(config.headers || {}) };
+  const headers = {
+    "Content-Type": "application/json",
+    ...(config.headers || {}),
+  };
   const token = localStorage.getItem(TOKEN_KEY);
   if (token) headers.Authorization = `Bearer ${token}`;
 
   const response = await fetch(buildUrl(path, config.params), {
     method,
     headers,
-    credentials: 'include',
+    credentials: "include",
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    const error = new Error(data.message || 'Permintaan ke server gagal');
+    const error = new Error(data.message || "Permintaan ke server gagal");
     error.response = { status: response.status, data };
     if (response.status === 401) {
       localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem('cinematix_user');
-      if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/admin/login')) {
-        window.location.href = '/login';
+      localStorage.removeItem("cinematix_user");
+
+      // 👇 Jangan auto-redirect jika request-nya adalah '/auth/me'
+      // Biarkan Frontend (React) yang menangani UX-nya melalui try-catch
+      if (
+        !window.location.pathname.startsWith("/login") &&
+        !window.location.pathname.startsWith("/admin/login") &&
+        !path.includes("/auth/me") // Tambahkan pengecualian ini
+      ) {
+        window.location.href = "/login";
       }
     }
     throw error;
@@ -39,10 +49,10 @@ const request = async (method, path, body, config = {}) => {
 };
 
 const api = {
-  get: (path, config) => request('GET', path, undefined, config),
-  post: (path, body, config) => request('POST', path, body, config),
-  put: (path, body, config) => request('PUT', path, body, config),
-  delete: (path, config) => request('DELETE', path, undefined, config),
+  get: (path, config) => request("GET", path, undefined, config),
+  post: (path, body, config) => request("POST", path, body, config),
+  put: (path, body, config) => request("PUT", path, body, config),
+  delete: (path, config) => request("DELETE", path, undefined, config),
 };
 
 export const saveToken = (token) => localStorage.setItem(TOKEN_KEY, token);

@@ -70,16 +70,11 @@
   }
 
   .infinite-card-rail {
-    @apply cursor-grab select-none;
-    touch-action: pan-y;
+    @apply cursor-grab select-none touch-pan-x;
   }
 
   .infinite-card-rail:active {
     @apply cursor-grabbing;
-  }
-
-  .infinite-card-track {
-    @apply flex gap-5 will-change-transform;
   }
 
   .cinema-row::-webkit-scrollbar {

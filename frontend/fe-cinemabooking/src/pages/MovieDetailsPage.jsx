@@ -1,21 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Play, Star, Ticket } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { movieService } from '@/services/movieService';
 import { showtimeService } from '@/services/showtimeService';
+import { bioskopService } from '@/services/bioskopService';
+import { locationService } from '@/services/locationService';
 export default function MovieDetailsPage() {
     const { id } = useParams();
     const [movie, setMovie] = useState(null);
     const [showtimes, setShowtimes] = useState([]);
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedShowtime, setSelectedShowtime] = useState(null);
+    const [locations, setLocations] = useState([]);
+    const [bioskops, setBioskops] = useState([]);
+    const [selectedLocation, setSelectedLocation] = useState('');
+    const [selectedBioskop, setSelectedBioskop] = useState('');
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (id) {
             fetchMovie(id);
         }
     }, [id]);
+    useEffect(() => {
+        const loadFilters = async () => {
+            try {
+                const [locationsData, bioskopsData] = await Promise.all([
+                    locationService.getLocations(),
+                    bioskopService.getBioskops(),
+                ]);
+                setLocations(locationsData.data || locationsData || []);
+                setBioskops(bioskopsData.data || bioskopsData || []);
+            } catch (error) {
+                console.error('Error loading cinema filters:', error);
+            }
+        };
+        loadFilters();
+    }, []);
     const fetchMovie = async (movieId) => {
         try {
             const [movieData, showtimeData] = await Promise.all([
@@ -40,8 +61,27 @@ export default function MovieDetailsPage() {
             setLoading(false);
         }
     };
-    const availableDates = [...new Set(showtimes.map((showtime) => showtime.show_date.split('T')[0]))];
-    const visibleShowtimes = showtimes.filter((showtime) => showtime.show_date.startsWith(selectedDate));
+    const getId = (value) => typeof value === 'object' && value !== null ? value._id : value;
+    const filteredBioskops = useMemo(() => bioskops.filter((bioskop) =>
+        !selectedLocation || getId(bioskop.locationId) === selectedLocation,
+    ), [bioskops, selectedLocation]);
+    const showtimesForCinema = useMemo(() => showtimes.filter((showtime) => {
+        const bioskopId = getId(showtime.bioskopId);
+        if (selectedBioskop && bioskopId !== selectedBioskop) return false;
+        if (!selectedLocation) return true;
+        const bioskop = bioskops.find((item) => item._id === bioskopId);
+        return getId(bioskop?.locationId || showtime.bioskopId?.locationId) === selectedLocation;
+    }), [showtimes, bioskops, selectedLocation, selectedBioskop]);
+    const availableDates = useMemo(() => [...new Set(
+        showtimesForCinema.map((showtime) => showtime.show_date.split('T')[0]),
+    )], [showtimesForCinema]);
+    const visibleShowtimes = showtimesForCinema.filter((showtime) => showtime.show_date.startsWith(selectedDate));
+    useEffect(() => {
+        if (!availableDates.includes(selectedDate)) {
+            setSelectedDate(availableDates[0] || '');
+            setSelectedShowtime(null);
+        }
+    }, [availableDates, selectedDate]);
     if (loading) {
         return (<div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg"/>
@@ -99,7 +139,7 @@ export default function MovieDetailsPage() {
                     <span>{movie.duration} minutes</span>
                   </div>
                   <div className="px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-sm font-medium">
-                    {movie.genre}
+                    {Array.isArray(movie.genre) ? movie.genre.join(', ') : movie.genre}
                   </div>
                 </div>
               </div>
@@ -159,10 +199,34 @@ export default function MovieDetailsPage() {
               {showtimes.length > 0 ? (<div className="cinema-panel sticky top-24 p-6">
                   <p className="section-eyebrow mb-3">Book now</p>
                   <h2 className="text-2xl font-semibold mb-4">Select Showtime</h2>
-                  <div className="mb-5 flex items-center gap-2 rounded-md bg-dark-950 px-3 py-2 text-sm text-slate-300">
-                    <MapPin className="h-4 w-4 text-accent-400"/>
-                    CinemaID Grand Indonesia
+                  <div className="mb-5 grid gap-3">
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-slate-400">Lokasi</label>
+                      <select value={selectedLocation} onChange={(event) => {
+                    setSelectedLocation(event.target.value);
+                    setSelectedBioskop('');
+                    setSelectedShowtime(null);
+                }} className="input">
+                        <option value="">Semua lokasi</option>
+                        {locations.map((location) => (<option key={location._id} value={location._id}>
+                            {location.city || location.name}
+                          </option>))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm font-medium text-slate-400">Bioskop</label>
+                      <select value={selectedBioskop} onChange={(event) => {
+                    setSelectedBioskop(event.target.value);
+                    setSelectedShowtime(null);
+                }} className="input">
+                        <option value="">Semua bioskop</option>
+                        {filteredBioskops.map((bioskop) => (<option key={bioskop._id} value={bioskop._id}>
+                            {bioskop.name}
+                          </option>))}
+                      </select>
+                    </div>
                   </div>
+                  <div className="mb-3 flex items-center gap-2 text-sm text-slate-400"><MapPin className="h-4 w-4 text-accent-400"/>Pilih lokasi, bioskop, dan tanggal tayang.</div>
                   <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
                     {availableDates.map((date) => (<button key={date} onClick={() => {
                     setSelectedDate(date);
@@ -177,13 +241,13 @@ export default function MovieDetailsPage() {
                       </button>))}
                   </div>
                   <div className="space-y-3">
-                    {visibleShowtimes.map((showtime) => (<button key={showtime._id} onClick={() => setSelectedShowtime(showtime)} className={`w-full rounded-lg border p-4 text-left transition hover:border-primary-500 ${selectedShowtime?._id === showtime._id ? 'border-primary-500 bg-primary-500/10' : ''}`}>
+                    {visibleShowtimes.length > 0 ? visibleShowtimes.map((showtime) => (<button key={showtime._id} onClick={() => setSelectedShowtime(showtime)} className={`w-full rounded-lg border p-4 text-left transition hover:border-primary-500 ${selectedShowtime?._id === showtime._id ? 'border-primary-500 bg-primary-500/10' : ''}`}>
                         <div className="flex items-center justify-between">
                           <p className="text-lg font-bold">{showtime.start_time}</p>
                           <p className="text-accent-400 font-semibold">IDR {showtime.ticket_price.toLocaleString()}</p>
                         </div>
                         <p className="text-sm text-slate-400">{showtime.hall.hall_name} • {showtime.end_time} finish</p>
-                      </button>))}
+                      </button>)) : <p className="rounded-lg border border-dashed border-white/15 p-4 text-sm text-slate-400">Tidak ada jadwal untuk filter yang dipilih.</p>}
                   </div>
                   <Link to={selectedShowtime ? `/booking/${selectedShowtime._id}` : `/book/${movie._id}`} className="btn btn-primary mt-5 w-full py-3 text-base">
                     <Ticket className="h-5 w-5"/>
