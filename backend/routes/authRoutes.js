@@ -8,7 +8,7 @@ const loginLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 5,
   message: {
-    message: "Terlalu banyak percobaan login, coba lagi setelah 15 menit",
+    message: "Terlalu banyak percobaan login, coba lagi setelah 5 menit",
   },
 });
 
