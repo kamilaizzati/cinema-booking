@@ -121,6 +121,7 @@ const validateRelations = () => {
     (item) => `${item.studioId}:${item.code}`,
     "kursi studio",
   );
+
   assertNoDuplicateKeys(
     seeds.showtimes,
     (item) =>

@@ -4,10 +4,9 @@ const { register, login, getMe } = require("../controllers/authController");
 const rateLimit = require("express-rate-limit");
 const { protect } = require("../middleware/authMiddleware");
 
-
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 5, 
+  windowMs: 5 * 60 * 1000,
+  max: 5,
   message: {
     message: "Terlalu banyak percobaan login, coba lagi setelah 15 menit",
   },

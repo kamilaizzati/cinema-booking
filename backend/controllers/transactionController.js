@@ -25,13 +25,16 @@ exports.createTransaction = async (req, res) => {
       userId: req.user.id,
       amount,
       paymentMethod,
-      status: "pending", // Status awal selalu pending
+      status: "success",      // Dummy: langsung dianggap berhasil
+      paymentDate: new Date(),
     });
+
+    // Booking otomatis confirmed ketika transaksi sukses
+    await Booking.findByIdAndUpdate(bookingId, { status: "confirmed" });
 
     res.status(201).json({
       success: true,
-      message:
-        "Transaksi berhasil dibuat. Silakan lakukan simulasi pembayaran.",
+      message: "Transaksi berhasil dibuat. Booking Anda telah dikonfirmasi!",
       data: transaction,
     });
   } catch (error) {

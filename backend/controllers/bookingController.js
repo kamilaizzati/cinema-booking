@@ -2,6 +2,35 @@ const Booking = require("../models/Booking");
 const Showtime = require("../models/Showtime");
 const Seat = require("../models/Seat");
 
+/**
+ * Auto-cancel pending bookings older than 5 minutes and free their seats.
+ * Called by the scheduler in app.js every minute.
+ */
+const cancelExpiredBookings = async () => {
+  try {
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const expired = await Booking.find({
+      status: "pending",
+      createdAt: { $lt: fiveMinutesAgo },
+    });
+
+    for (const booking of expired) {
+      // Restore seats back to showtime so others can book them
+      await Showtime.findByIdAndUpdate(booking.showtimeId, {
+        $pull: { bookedSeats: { $in: booking.seats } },
+      });
+      booking.status = "cancelled";
+      await booking.save();
+    }
+
+    if (expired.length > 0) {
+      console.log(`[Scheduler] Auto-cancelled ${expired.length} expired booking(s).`);
+    }
+  } catch (err) {
+    console.error("[Scheduler] Error cancelling expired bookings:", err.message);
+  }
+};
+
 const getBookings = async (req, res) => {
   try {
     const bookings = await Booking.find()
@@ -175,4 +204,5 @@ module.exports = {
   createBooking,
   updateBooking,
   deleteBooking,
+  cancelExpiredBookings,
 };

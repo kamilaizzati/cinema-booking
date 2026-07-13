@@ -155,6 +155,7 @@ export default function AdminResourcesPage({ config }) {
     }
   };
   useEffect(() => {
+    setItems([]);   // clear stale rows immediately before re-fetching
     load();
   }, [config]);
   const remove = async (item) => {

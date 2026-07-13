@@ -13,6 +13,7 @@ const showtimeRoutes = require("./routes/showtimeRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const studioRoutes = require("./routes/studioRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const { cancelExpiredBookings } = require("./controllers/bookingController");
 
 const app = express();
 
@@ -44,5 +45,9 @@ app.use("/api/showtimes", showtimeRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/studios", studioRoutes);
 app.use("/api/admin", adminRoutes);
+
+// ── Auto-cancel pending bookings older than 5 minutes (runs every 60 s) ──
+setInterval(cancelExpiredBookings, 60 * 1000);
+console.log("[Scheduler] Booking expiry checker started (every 60 s).");
 
 module.exports = app;

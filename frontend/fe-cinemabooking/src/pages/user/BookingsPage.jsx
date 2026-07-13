@@ -1,12 +1,45 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Eye, X, CreditCard } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Calendar, Clock, MapPin, Eye, X, CreditCard, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { bookingService } from '@/services/bookingService';
 import { transactionService } from '@/services/transactionService';
+
+/** Shows a live countdown (MM:SS) for how long until this pending booking expires. */
+function PendingCountdown({ createdAt, onExpired }) {
+    const EXPIRY_MS = 5 * 60 * 1000;
+    const calc = useCallback(() => {
+        const elapsed = Date.now() - new Date(createdAt).getTime();
+        return Math.max(0, Math.ceil((EXPIRY_MS - elapsed) / 1000));
+    }, [createdAt]);
+    const [secs, setSecs] = useState(calc);
+
+    useEffect(() => {
+        if (secs === 0) { onExpired?.(); return; }
+        const id = setInterval(() => {
+            const remaining = calc();
+            setSecs(remaining);
+            if (remaining === 0) onExpired?.();
+        }, 1000);
+        return () => clearInterval(id);
+    }, [secs, calc, onExpired]);
+
+    const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+    const ss = String(secs % 60).padStart(2, '0');
+    const urgent = secs <= 60;
+    return (
+        <span className={`inline-flex items-center gap-1 text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+            urgent ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-yellow-500/20 text-yellow-400'
+        }`}>
+            ⏱ {mm}:{ss} left
+        </span>
+    );
+}
+
 export default function BookingsPage() {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [bookings, setBookings] = useState([]);
     const [transactions, setTransactions] = useState([]);
@@ -41,12 +74,23 @@ export default function BookingsPage() {
         try {
             await bookingService.cancelBooking(bookingId);
             toast.success('Booking cancelled successfully');
-            fetchBookings(); // Refresh the list
+            fetchBookings();
         }
         catch (error) {
             console.error('Error cancelling booking:', error);
             toast.error('Failed to cancel booking');
         }
+    };
+    const handleContinuePayment = (booking) => {
+        const selectionData = {
+            movieId: booking.showtime?.movie?._id || booking.showtime?.movie,
+            showtimeId: booking.showtime?._id || booking.showtime,
+            seats: booking.selected_seats || [],
+            bookingId: booking._id,
+            totalAmount: booking.total_amount,
+        };
+        sessionStorage.setItem('seatSelection', JSON.stringify(selectionData));
+        navigate('/payment');
     };
     const getStatusBadge = (status) => {
         const baseClasses = 'status-badge';
@@ -109,6 +153,12 @@ export default function BookingsPage() {
                         <span className={getStatusBadge(booking.status)}>
                           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                         </span>
+                        {booking.status === 'pending' && booking.createdAt && (
+                          <PendingCountdown
+                            createdAt={booking.createdAt}
+                            onExpired={fetchBookings}
+                          />
+                        )}
                         <span className="text-lg font-semibold text-primary-400">
                           IDR {booking.total_amount.toLocaleString()}
                         </span>
@@ -127,15 +177,30 @@ export default function BookingsPage() {
                     </div>
                   </div>
 
-                  <div className="flex space-x-3">
+                  <div className="flex flex-wrap gap-3">
                     <Link to={`/tickets/${booking._id}`} className="btn btn-secondary flex items-center space-x-2">
                       <Eye className="h-4 w-4"/>
                       <span>View</span>
                     </Link>
-                    {booking.status === 'confirmed' && (<button onClick={() => handleCancelBooking(booking._id)} className="btn btn-danger flex items-center space-x-2">
+                    {booking.status === 'pending' && (
+                      <button
+                        onClick={() => handleContinuePayment(booking)}
+                        className="btn btn-primary flex items-center space-x-2"
+                      >
+                        <CreditCard className="h-4 w-4"/>
+                        <span>Continue Payment</span>
+                        <ArrowRight className="h-4 w-4"/>
+                      </button>
+                    )}
+                    {(booking.status === 'confirmed' || booking.status === 'pending') && (
+                      <button
+                        onClick={() => handleCancelBooking(booking._id)}
+                        className="btn btn-danger flex items-center space-x-2"
+                      >
                         <X className="h-4 w-4"/>
                         <span>Cancel</span>
-                      </button>)}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>);

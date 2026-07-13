@@ -184,67 +184,93 @@ exports.getReport = async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    // Today's revenue — use createdAt as fallback when paymentDate is null (dummy transactions)
+    const todayRevAgg = await Transaction.aggregate([
+      {
+        $match: {
+          status: "success",
+          $or: [
+            { paymentDate: { $gte: today, $lt: tomorrow } },
+            { paymentDate: null, createdAt: { $gte: today, $lt: tomorrow } },
+            { paymentDate: { $exists: false }, createdAt: { $gte: today, $lt: tomorrow } },
+          ],
+        },
+      },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+
+    // Weekly revenue — daily breakdown for the bar chart (last 7 days)
     const lastWeek = new Date(today);
-    lastWeek.setDate(lastWeek.getDate() - 7);
+    lastWeek.setDate(lastWeek.getDate() - 6);
 
-    const todayRevenue = await Transaction.aggregate([
+    const weeklyAgg = await Transaction.aggregate([
       {
         $match: {
           status: "success",
-          paymentDate: {
-            $gte: today,
-            $lt: tomorrow,
+          $or: [
+            { paymentDate: { $gte: lastWeek } },
+            { paymentDate: null, createdAt: { $gte: lastWeek } },
+            { paymentDate: { $exists: false }, createdAt: { $gte: lastWeek } },
+          ],
+        },
+      },
+      {
+        $project: {
+          amount: 1,
+          dateUsed: {
+            $ifNull: ["$paymentDate", "$createdAt"],
           },
         },
       },
       {
         $group: {
-          _id: null,
-          total: {
-            $sum: "$amount",
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$dateUsed" },
           },
+          revenue: { $sum: "$amount" },
         },
       },
+      { $sort: { _id: 1 } },
     ]);
 
-    const weeklyRevenue = await Transaction.aggregate([
-      {
-        $match: {
-          status: "success",
-          paymentDate: {
-            $gte: lastWeek,
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: {
-            $sum: "$amount",
-          },
-        },
-      },
-    ]);
+    // Fill in missing days with 0
+    const weeklyRevenue = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split("T")[0];
+      const found = weeklyAgg.find((x) => x._id === dateStr);
+      weeklyRevenue.push({
+        date: dateStr.slice(5), // MM-DD for display
+        revenue: found ? found.revenue : 0,
+      });
+    }
 
-    const nowShowingMovies = await Showtime.countDocuments({
-      isActive: true,
-    });
+    // Now showing: movies with release = true
+    const nowShowingMovies = await Movie.countDocuments({ release: true });
 
-    const activeShowtimes = await Showtime.find({ isActive: true })
+    // Active halls: unique active showtimes' studios
+    const activeHalls = await Showtime.countDocuments({ isActive: true });
+
+    // All confirmed bookings for report table
+    const confirmedBookings = await Booking.find({ status: "confirmed" })
+      .populate("userId", "name email")
       .populate("movieId", "title poster")
-      .populate("bioskopId", "name");
+      .populate({ path: "showtimeId", populate: { path: "studioId", select: "name" } })
+      .sort({ createdAt: -1 })
+      .limit(50);
 
     res.status(200).json({
       success: true,
       data: {
-        todayRevenue: todayRevenue[0]?.total || 0,
-        weeklyRevenue: weeklyRevenue[0]?.total || 0,
+        todayRevenue: todayRevAgg[0]?.total || 0,
+        weeklyRevenue,
         nowShowingMovies,
-        activeShowtimes,
+        activeHalls,
+        confirmedBookings,
       },
     });
   } catch (error) {

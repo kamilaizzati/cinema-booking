@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Users, Ticket, ArrowLeft } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Ticket, ArrowLeft, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { bookingService } from '@/services/bookingService';
+import { transactionService } from '@/services/transactionService';
 export default function BookingDetailsPage() {
     const { id } = useParams();
     const { user } = useAuth();
     const [booking, setBooking] = useState(null); // Updated state type
+    const [transaction, setTransaction] = useState(null);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (id && user) {
@@ -22,6 +24,17 @@ export default function BookingDetailsPage() {
                 throw new Error("You are not authorized to view this booking.");
             }
             setBooking(data);
+            try {
+                const transactions = await transactionService.getHistory();
+                setTransaction(transactions.find((item) => {
+                    const transactionBookingId = typeof item.bookingId === 'string'
+                        ? item.bookingId
+                        : item.bookingId?._id;
+                    return String(transactionBookingId) === String(bookingId);
+                }) || null);
+            } catch (transactionError) {
+                console.error('Error fetching transaction history:', transactionError);
+            }
         }
         catch (error) {
             console.error('Error fetching booking details:', error);
@@ -41,6 +54,80 @@ export default function BookingDetailsPage() {
                 return `${baseClasses} status-pending`;
         }
     };
+    const formatDateTime = (date) => {
+        if (!date) return '-';
+        const parsedDate = new Date(date);
+        return Number.isNaN(parsedDate.getTime()) ? '-' : parsedDate.toLocaleString('id-ID');
+    };
+    const handleDownloadPdf = () => {
+        const bookingDate = formatDateTime(transaction?.paymentDate);
+        const showDate = booking.showtime?.show_date
+            ? new Date(booking.showtime.show_date).toLocaleDateString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            })
+            : '-';
+        const details = [
+            `Booking ID: #${booking._id.slice(-6)}`,
+            `Customer: ${booking.user?.fullName || '-'}`,
+            `Email: ${booking.user?.email || '-'}`,
+            `Movie: ${booking.showtime?.movie?.title || '-'}`,
+            `Hall: ${booking.showtime?.hall?.hall_name || '-'}`,
+            `Show Date: ${showDate}`,
+            `Show Time: ${booking.showtime?.start_time || '-'}`,
+            `Seats: ${booking.selected_seats?.join(', ') || '-'}`,
+            `Number of Tickets: ${booking.total_seats || 0}`,
+            `Total Amount: IDR ${(booking.total_amount || 0).toLocaleString('id-ID')}`,
+            `Booking Date: ${bookingDate}`,
+            `Status: ${booking.status || '-'}`,
+        ];
+        const escapePdfText = (value) => String(value)
+            .replace(/\\/g, '\\\\')
+            .replace(/[()]/g, '\\$&')
+            .replace(/[^\x20-\x7E]/g, '?');
+        const textLines = details.flatMap((line) => {
+            const words = line.split(' ');
+            return words.reduce((lines, word) => {
+                const lastLine = lines[lines.length - 1];
+                if (`${lastLine} ${word}`.length > 82) lines.push(word);
+                else lines[lines.length - 1] = `${lastLine} ${word}`.trim();
+                return lines;
+            }, ['']);
+        });
+        const content = [
+            '0.06 0.09 0.16 rg 0 800 595 42 re f',
+            '1 1 1 rg BT /F1 22 Tf 42 817 Td (Cinema Booking Details) Tj ET',
+            `BT /F1 10 Tf 42 804 Td (Booking #${escapePdfText(booking._id.slice(-6))}) Tj ET`,
+            '0.06 0.09 0.16 rg',
+            ...textLines.map((line, index) => `BT /F1 11 Tf 42 ${775 - (index * 22)} Td (${escapePdfText(line)}) Tj ET`),
+        ].join('\n');
+        const objects = [
+            '<< /Type /Catalog /Pages 2 0 R >>',
+            '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+            '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>',
+            `<< /Length ${new TextEncoder().encode(content).length} >>\nstream\n${content}\nendstream`,
+            '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+        ];
+        let pdf = '%PDF-1.4\n';
+        const offsets = [0];
+        objects.forEach((object, index) => {
+            offsets.push(new TextEncoder().encode(pdf).length);
+            pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+        });
+        const xrefOffset = new TextEncoder().encode(pdf).length;
+        pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+        pdf += offsets.slice(1).map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`).join('');
+        pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+
+        const url = URL.createObjectURL(new Blob([pdf], { type: 'application/pdf' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `booking-${booking._id.slice(-6)}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
     if (loading) {
         return (<div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg"/>
@@ -58,12 +145,16 @@ export default function BookingDetailsPage() {
     }
     return (<div className="min-h-screen py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center space-x-4 mb-8">
+        <div className="flex flex-wrap items-center gap-4 mb-8">
           <Link to="/my-bookings" className="btn btn-secondary flex items-center space-x-2">
             <ArrowLeft className="h-4 w-4"/>
             <span>Back</span>
           </Link>
           <h1 className="text-3xl font-display font-bold">Booking Details</h1>
+          <button onClick={handleDownloadPdf} className="btn btn-primary flex items-center space-x-2 sm:ml-auto">
+            <Download className="h-4 w-4"/>
+            <span>Download PDF</span>
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -158,7 +249,7 @@ export default function BookingDetailsPage() {
                     <div>
                       <p className="text-slate-400">Booking Date</p>
                       <p className="font-medium">
-                        {new Date(booking.booking_date).toLocaleString()}
+                        {formatDateTime(transaction?.paymentDate)}
                       </p>
                     </div>
                     <div>

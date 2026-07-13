@@ -125,7 +125,15 @@ export default function PaymentPage() {
     return (<div className="min-h-screen bg-dark-950 text-white">
       <header className="sticky top-0 z-50 border-b border-white/10 bg-dark-950/90 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <button onClick={() => navigate(-1)} className="btn btn-secondary flex items-center space-x-2">
+          <button
+            onClick={() => {
+              const confirmed = window.confirm(
+                'Are you sure you want to go back? Your payment selection may be lost.'
+              );
+              if (confirmed) navigate(-1);
+            }}
+            className="btn btn-secondary flex items-center space-x-2"
+          >
             <ArrowLeft className="h-4 w-4"/>
             <span>Back</span>
           </button>

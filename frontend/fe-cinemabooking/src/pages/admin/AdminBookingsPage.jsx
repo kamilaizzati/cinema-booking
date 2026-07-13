@@ -190,14 +190,6 @@ export default function AdminBookingsPage() {
                         <Link to={`/admin/bookings/${booking._id}`} className="text-blue-400 hover:text-blue-300">
                           <Eye className="h-4 w-4"/>
                         </Link>
-                        {booking.status === 'pending' && (<>
-                            <button onClick={() => handleUpdateBookingStatus(booking._id, 'confirmed')} className="text-green-400 hover:text-green-300">
-                              <CheckCircle className="h-4 w-4"/>
-                            </button>
-                            <button onClick={() => handleUpdateBookingStatus(booking._id, 'cancelled')} className="text-red-400 hover:text-red-300">
-                              <XCircle className="h-4 w-4"/>
-                            </button>
-                          </>)}
                       </div>
                     </td>
                   </tr>))}
