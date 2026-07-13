@@ -248,16 +248,23 @@ export default function BookingPage() {
   };
 
   // ─── LOGIKA FILTER BIOSKOP DAN SHOWTIME ───
+  const getId = (value) => typeof value === 'object' && value !== null ? value._id : value;
+
+  // Derive which bioskops actually have showtimes for this movie
+  const availableBioskopIds = useMemo(() => new Set(showtimes.map((s) => getId(s.bioskopId))), [showtimes]);
+  const availableBioskops = useMemo(() => bioskops.filter((b) => availableBioskopIds.has(b._id)), [bioskops, availableBioskopIds]);
+
+  // Derive which locations have at least one available bioskop
+  const availableLocationIds = useMemo(() => new Set(availableBioskops.map((b) => getId(b.locationId))), [availableBioskops]);
+  const availableLocations = useMemo(() => locations.filter((l) => availableLocationIds.has(l._id)), [locations, availableLocationIds]);
+
   const filteredBioskops = useMemo(() => {
-    return bioskops.filter((b) => {
+    return availableBioskops.filter((b) => {
       if (!selectedLocation) return true;
-      const locId =
-        typeof b.locationId === "object" && b.locationId !== null
-          ? b.locationId._id
-          : b.locationId;
+      const locId = getId(b.locationId);
       return locId === selectedLocation;
     });
-  }, [bioskops, selectedLocation]);
+  }, [availableBioskops, selectedLocation]);
 
   const filteredShowtimes = useMemo(() => {
     return showtimes.filter((st) => {
@@ -301,6 +308,25 @@ export default function BookingPage() {
     selectedBioskop,
     bioskops,
   ]);
+
+  // Dates that have showtimes for the current location/bioskop (ignoring date filter)
+  const datesWithShowtimes = useMemo(() => {
+    const dates = showtimes.filter((st) => {
+      const stBioskopId = getId(st.bioskopId);
+      if (selectedBioskop && stBioskopId !== selectedBioskop) return false;
+      if (selectedLocation) {
+        const bioskopOfSt = bioskops.find((b) => b._id === stBioskopId);
+        if (bioskopOfSt) {
+          if (getId(bioskopOfSt.locationId) !== selectedLocation) return false;
+        } else {
+          const nestedLocId = st.bioskopId?.locationId?._id || st.bioskopId?.locationId;
+          if (nestedLocId !== selectedLocation) return false;
+        }
+      }
+      return true;
+    }).map((st) => new Date(st.show_date).toISOString().split("T")[0]);
+    return new Set(dates);
+  }, [showtimes, selectedLocation, selectedBioskop, bioskops]);
 
   if (loading || !movie) {
     return (
@@ -361,7 +387,7 @@ export default function BookingPage() {
                 }}
               >
                 <option value="">All Locations</option>
-                {locations.map((loc) => (
+                {availableLocations.map((loc) => (
                   <option key={loc._id} value={loc._id}>
                     {loc.city || loc.name}
                   </option>
@@ -396,14 +422,18 @@ export default function BookingPage() {
               {availableDates.map((dateStr) => {
                 const dateObj = new Date(dateStr);
                 const isSelected = selectedDateFilter === dateStr;
+                const hasShowtimes = datesWithShowtimes.has(dateStr);
                 return (
                   <button
                     key={dateStr}
+                    disabled={!hasShowtimes}
                     onClick={() => setSelectedDateFilter(dateStr)}
                     className={`flex min-w-[80px] flex-col items-center justify-center rounded-lg border p-3 transition ${
-                      isSelected
-                        ? "border-primary-500 bg-primary-600 text-white shadow-lg shadow-primary-500/20"
-                        : "border-white/10 bg-dark-950 text-slate-400 hover:border-primary-500/50 hover:text-white"
+                      !hasShowtimes
+                        ? "border-white/5 bg-dark-950 text-slate-600 opacity-40 cursor-not-allowed"
+                        : isSelected
+                          ? "border-primary-500 bg-primary-600 text-white shadow-lg shadow-primary-500/20"
+                          : "border-white/10 bg-dark-950 text-slate-400 hover:border-primary-500/50 hover:text-white"
                     }`}
                   >
                     <span className="text-xs uppercase tracking-wider mb-1">

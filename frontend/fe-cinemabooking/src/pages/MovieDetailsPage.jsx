@@ -72,9 +72,15 @@ export default function MovieDetailsPage() {
         }
     };
     const getId = (value) => typeof value === 'object' && value !== null ? value._id : value;
-    const filteredBioskops = useMemo(() => bioskops.filter((bioskop) =>
+    // Derive which bioskops actually have showtimes for this movie
+    const availableBioskopIds = useMemo(() => new Set(showtimes.map((s) => getId(s.bioskopId))), [showtimes]);
+    const availableBioskops = useMemo(() => bioskops.filter((b) => availableBioskopIds.has(b._id)), [bioskops, availableBioskopIds]);
+    // Derive which locations have at least one available bioskop
+    const availableLocationIds = useMemo(() => new Set(availableBioskops.map((b) => getId(b.locationId))), [availableBioskops]);
+    const availableLocations = useMemo(() => locations.filter((l) => availableLocationIds.has(l._id)), [locations, availableLocationIds]);
+    const filteredBioskops = useMemo(() => availableBioskops.filter((bioskop) =>
         !selectedLocation || getId(bioskop.locationId) === selectedLocation,
-    ), [bioskops, selectedLocation]);
+    ), [availableBioskops, selectedLocation]);
     const showtimesForCinema = useMemo(() => showtimes.filter((showtime) => {
         const bioskopId = getId(showtime.bioskopId);
         if (selectedBioskop && bioskopId !== selectedBioskop) return false;
@@ -82,16 +88,20 @@ export default function MovieDetailsPage() {
         const bioskop = bioskops.find((item) => item._id === bioskopId);
         return getId(bioskop?.locationId || showtime.bioskopId?.locationId) === selectedLocation;
     }), [showtimes, bioskops, selectedLocation, selectedBioskop]);
-    const availableDates = useMemo(() => [...new Set(
+    const allDates = useMemo(() => [...new Set(
+        showtimes.map((showtime) => showtime.show_date.split('T')[0]),
+    )].sort(), [showtimes]);
+    const availableDates = useMemo(() => new Set(
         showtimesForCinema.map((showtime) => showtime.show_date.split('T')[0]),
-    )], [showtimesForCinema]);
+    ), [showtimesForCinema]);
     const visibleShowtimes = showtimesForCinema.filter((showtime) => showtime.show_date.startsWith(selectedDate));
     useEffect(() => {
-        if (!availableDates.includes(selectedDate)) {
-            setSelectedDate(availableDates[0] || '');
+        if (!availableDates.has(selectedDate)) {
+            const firstAvailable = allDates.find((d) => availableDates.has(d)) || '';
+            setSelectedDate(firstAvailable);
             setSelectedShowtime(null);
         }
-    }, [availableDates, selectedDate]);
+    }, [availableDates, allDates, selectedDate]);
     if (loading) {
         return (<div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg"/>
@@ -225,7 +235,7 @@ export default function MovieDetailsPage() {
                     setSelectedShowtime(null);
                 }} className="input">
                         <option value="">Semua lokasi</option>
-                        {locations.map((location) => (<option key={location._id} value={location._id}>
+                        {availableLocations.map((location) => (<option key={location._id} value={location._id}>
                             {location.city || location.name}
                           </option>))}
                       </select>
@@ -247,17 +257,20 @@ export default function MovieDetailsPage() {
                   {selectedLocation && selectedBioskop ? (
                     <>
                       <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
-                        {availableDates.map((date) => (<button key={date} onClick={() => {
-                        setSelectedDate(date);
-                        setSelectedShowtime(null);
-                    }} className={`min-w-24 rounded-md px-4 py-3 text-left transition ${selectedDate === date ? 'bg-primary-600 text-white' : 'bg-dark-950 text-slate-300 hover:bg-dark-800'}`}>
+                        {allDates.map((date) => {
+                          const isAvailable = availableDates.has(date);
+                          return (<button key={date} disabled={!isAvailable} onClick={() => {
+                            setSelectedDate(date);
+                            setSelectedShowtime(null);
+                          }} className={`min-w-24 rounded-md px-4 py-3 text-left transition ${!isAvailable ? 'opacity-40 cursor-not-allowed bg-dark-950 text-slate-500' : selectedDate === date ? 'bg-primary-600 text-white' : 'bg-dark-950 text-slate-300 hover:bg-dark-800'}`}>
                             <span className="block text-xs uppercase opacity-70">
                               {new Date(date).toLocaleDateString('en-US', { weekday: 'short' })}
                             </span>
                             <span className="block font-bold">
                               {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </span>
-                          </button>))}
+                          </button>);
+                        })}
                       </div>
                       <div className="space-y-3">
                         {visibleShowtimes.length > 0 ? visibleShowtimes.map((showtime) => (<button key={showtime._id} onClick={() => setSelectedShowtime(showtime)} className={`w-full rounded-lg border p-4 text-left transition hover:border-primary-500 ${selectedShowtime?._id === showtime._id ? 'border-primary-500 bg-primary-500/10' : ''}`}>
