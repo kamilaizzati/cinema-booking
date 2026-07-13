@@ -6,6 +6,16 @@ import { movieService } from '@/services/movieService';
 import { showtimeService } from '@/services/showtimeService';
 import { bioskopService } from '@/services/bioskopService';
 import { locationService } from '@/services/locationService';
+const getYouTubeEmbedUrl = (url) => {
+    if (!url) return '';
+    if (url.includes('/embed/')) return url;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11)
+        ? `https://www.youtube.com/embed/${match[2]}`
+        : url;
+};
+
 export default function MovieDetailsPage() {
     const { id } = useParams();
     const [movie, setMovie] = useState(null);
@@ -99,6 +109,8 @@ export default function MovieDetailsPage() {
     }
     const backdrop = movie.backgroundImage || movie.backdrop_url || movie.poster || movie.poster_url;
     const canBook = movie.status === 'now_showing' && showtimes.length > 0;
+    const trailerRawUrl = movie.trailer || movie.trailer_url;
+    const trailerEmbedUrl = getYouTubeEmbedUrl(trailerRawUrl);
     return (<div className="min-h-screen">
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${backdrop})` }}>
@@ -152,7 +164,7 @@ export default function MovieDetailsPage() {
                     <Ticket className="h-5 w-5"/>
                     No showtime yet
                   </button>)}
-                {movie.trailer_url && (<a href="#trailer" className="btn btn-secondary text-lg px-8 py-3">
+                {trailerRawUrl && (<a href="#trailer" className="btn btn-secondary text-lg px-8 py-3">
                     <Play className="h-5 w-5"/>
                     Watch Trailer
                   </a>)}
@@ -185,11 +197,11 @@ export default function MovieDetailsPage() {
               </div>
 
               {/* Trailer */}
-              {movie.trailer_url && (<div id="trailer">
+              {trailerRawUrl && (<div id="trailer">
                   <p className="section-eyebrow mb-3">Preview</p>
                   <h2 className="text-2xl font-semibold mb-4">Trailer</h2>
                   <div className="aspect-video rounded-xl overflow-hidden bg-dark-800">
-                    <iframe src={movie.trailer_url} title={`${movie.title} Trailer`} className="w-full h-full" allowFullScreen/>
+                    <iframe src={trailerEmbedUrl} title={`${movie.title} Trailer`} className="w-full h-full" allowFullScreen/>
                   </div>
                 </div>)}
 
@@ -227,28 +239,40 @@ export default function MovieDetailsPage() {
                     </div>
                   </div>
                   <div className="mb-3 flex items-center gap-2 text-sm text-slate-400"><MapPin className="h-4 w-4 text-accent-400"/>Pilih lokasi, bioskop, dan tanggal tayang.</div>
-                  <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
-                    {availableDates.map((date) => (<button key={date} onClick={() => {
-                    setSelectedDate(date);
-                    setSelectedShowtime(null);
-                }} className={`min-w-24 rounded-md px-4 py-3 text-left transition ${selectedDate === date ? 'bg-primary-600 text-white' : 'bg-dark-950 text-slate-300 hover:bg-dark-800'}`}>
-                        <span className="block text-xs uppercase opacity-70">
-                          {new Date(date).toLocaleDateString('en-US', { weekday: 'short' })}
-                        </span>
-                        <span className="block font-bold">
-                          {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      </button>))}
-                  </div>
-                  <div className="space-y-3">
-                    {visibleShowtimes.length > 0 ? visibleShowtimes.map((showtime) => (<button key={showtime._id} onClick={() => setSelectedShowtime(showtime)} className={`w-full rounded-lg border p-4 text-left transition hover:border-primary-500 ${selectedShowtime?._id === showtime._id ? 'border-primary-500 bg-primary-500/10' : ''}`}>
-                        <div className="flex items-center justify-between">
-                          <p className="text-lg font-bold">{showtime.start_time}</p>
-                          <p className="text-accent-400 font-semibold">IDR {showtime.ticket_price.toLocaleString()}</p>
-                        </div>
-                        <p className="text-sm text-slate-400">{showtime.hall.hall_name} • {showtime.end_time} finish</p>
-                      </button>)) : <p className="rounded-lg border border-dashed border-white/15 p-4 text-sm text-slate-400">Tidak ada jadwal untuk filter yang dipilih.</p>}
-                  </div>
+                  {selectedLocation && selectedBioskop ? (
+                    <>
+                      <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
+                        {availableDates.map((date) => (<button key={date} onClick={() => {
+                        setSelectedDate(date);
+                        setSelectedShowtime(null);
+                    }} className={`min-w-24 rounded-md px-4 py-3 text-left transition ${selectedDate === date ? 'bg-primary-600 text-white' : 'bg-dark-950 text-slate-300 hover:bg-dark-800'}`}>
+                            <span className="block text-xs uppercase opacity-70">
+                              {new Date(date).toLocaleDateString('en-US', { weekday: 'short' })}
+                            </span>
+                            <span className="block font-bold">
+                              {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                          </button>))}
+                      </div>
+                      <div className="space-y-3">
+                        {visibleShowtimes.length > 0 ? visibleShowtimes.map((showtime) => (<button key={showtime._id} onClick={() => setSelectedShowtime(showtime)} className={`w-full rounded-lg border p-4 text-left transition hover:border-primary-500 ${selectedShowtime?._id === showtime._id ? 'border-primary-500 bg-primary-500/10' : ''}`}>
+                            <div className="flex items-center justify-between">
+                              <p className="text-lg font-bold">{showtime.start_time}</p>
+                              <p className="text-accent-400 font-semibold">IDR {showtime.ticket_price.toLocaleString()}</p>
+                            </div>
+                            <p className="text-sm text-slate-400">{showtime.hall.hall_name} • {showtime.end_time} finish</p>
+                          </button>)) : <p className="rounded-lg border border-dashed border-white/15 p-4 text-sm text-slate-400">Tidak ada jadwal untuk filter yang dipilih.</p>}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="rounded-lg border border-white/5 bg-white/5 p-6 text-center text-slate-400">
+                      <MapPin className="h-10 w-10 mx-auto mb-3 opacity-20 text-accent-400" />
+                      <p className="text-white text-sm font-semibold">Silakan Pilih Lokasi & Bioskop</p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Pilih lokasi dan bioskop di atas untuk melihat jadwal tayang yang tersedia.
+                      </p>
+                    </div>
+                  )}
                   <Link to={selectedShowtime ? `/booking/${selectedShowtime._id}` : `/book/${movie._id}`} className="btn btn-primary mt-5 w-full py-3 text-base">
                     <Ticket className="h-5 w-5"/>
                     Continue to Seats
