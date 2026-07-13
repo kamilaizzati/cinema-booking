@@ -126,7 +126,7 @@ const createBooking = async (req, res) => {
       showtime.bookedSeats.includes(id),
     );
     if (alreadyBooked) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
         message: "Mohon maaf, kursi tersebut baru saja dipesan oleh orang lain",
       });
