@@ -27,6 +27,7 @@ const normalizeShowtime = (showtime) => {
     // Normalisasi tanggal dan waktu
     show_date: showtime.date || showtime.show_date || null,
     start_time: showtime.startTime || showtime.start_time || null,
+    end_time: showtime.endTime || showtime.end_time || null,
     ticket_price: showtime.price || showtime.ticket_price || 0,
 
     booked_seats: showtime.bookedSeats || [],

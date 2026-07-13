@@ -716,7 +716,7 @@ export default function AdminShowtimesPage() {
                       onClick={() => setCurrentPage(page)}
                       className={`px-4 py-2 text-sm font-medium transition ${
                         currentPage === page
-                          ? "bg-indigo-600 text-white font-semibold"
+                          ? "bg-primary-600 text-white font-semibold"
                           : "bg-dark-900 text-slate-300 hover:bg-dark-800"
                       }`}
                     >

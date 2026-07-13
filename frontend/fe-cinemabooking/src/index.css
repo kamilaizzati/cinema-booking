@@ -336,3 +336,15 @@
     transform: translateY(0);
   }
 }
+
+/* Make calendar/clock icons visible in dark mode, but normal in light mode */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+[data-theme='light'] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme='light'] input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: none;
+}
