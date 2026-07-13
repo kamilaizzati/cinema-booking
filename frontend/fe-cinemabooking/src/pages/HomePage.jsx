@@ -134,7 +134,7 @@ export default function HomePage() {
                 key={movie._id}
                 className="relative h-full w-full flex-none bg-cover bg-center"
                 style={{
-                  backgroundImage: `url(${movie.backdrop_url || movie.poster_url})`,
+                  backgroundImage: `url(${movie.backgroundImage || movie.backdrop_url || movie.poster || movie.poster_url})`,
                 }}
               />
             ))}
@@ -214,7 +214,7 @@ export default function HomePage() {
                 className="relative mx-auto w-full max-w-[310px] overflow-hidden rounded border border-white/15 bg-black/35 p-3 shadow-2xl shadow-black/60 backdrop-blur"
               >
                 <img
-                  src={heroMovie.poster_url}
+                  src={heroMovie.poster || heroMovie.poster_url}
                   alt={heroMovie.title}
                   className="aspect-[2/3] w-full rounded object-cover"
                 />
@@ -237,17 +237,16 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <p className="section-eyebrow mb-3">Sedang Tayang</p>
+              <p className="section-eyebrow mb-3">Now Showing</p>
               <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
-                Film Sedang Tayang
+                Now Playing
               </h2>
               <p className="mt-3 max-w-2xl text-slate-400">
-                Pilih film yang sedang tayang, cek detailnya, lalu lanjut
-                booking kursi.
+                Explore the latest movies, check show details, and reserve your seats.
               </p>
             </div>
             <Link to="/movies" className="btn btn-secondary">
-              Lihat Semua
+              Browse All
             </Link>
           </div>
 
@@ -279,13 +278,12 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <p className="section-eyebrow mb-3">Akan Tayang</p>
+              <p className="section-eyebrow mb-3">Coming Soon</p>
               <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
-                Film Akan Tayang
+                Coming Soon to Theaters
               </h2>
               <p className="mt-3 max-w-2xl text-slate-400">
-                Daftar film berikutnya dengan poster, genre, dan jadwal rilis
-                yang mudah discroll.
+                Discover movies that are coming soon and see what’s next on the big screen.
               </p>
             </div>
           </div>

@@ -69,7 +69,7 @@ export default function BookingDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Movie Poster */}
           <div className="lg:col-span-1">
-            <img src={booking.showtime?.movie?.poster_url || 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop'} alt={booking.showtime?.movie?.title} className="w-full rounded-xl shadow-lg"/>
+            <img src={booking.showtime?.movie?.poster || booking.showtime?.movie?.poster_url || 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=400&h=600&fit=crop'} alt={booking.showtime?.movie?.title} className="w-full rounded-xl shadow-lg"/>
           </div>
 
           {/* Booking Information */}

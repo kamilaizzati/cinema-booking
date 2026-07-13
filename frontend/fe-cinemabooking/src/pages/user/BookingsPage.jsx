@@ -73,7 +73,7 @@ export default function BookingsPage() {
             {bookings.map((booking) => (<div key={booking._id} className="card p-6">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex items-start space-x-4 mb-4 lg:mb-0">
-                    <img src={booking.showtime?.movie?.poster_url || 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=100&h=150&fit=crop'} alt={booking.showtime?.movie?.title} className="w-16 h-24 object-cover rounded-lg"/>
+                    <img src={booking.showtime?.movie?.poster || booking.showtime?.movie?.poster_url || 'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=100&h=150&fit=crop'} alt={booking.showtime?.movie?.title} className="w-16 h-24 object-cover rounded-lg"/>
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold mb-2">
                         {booking.showtime?.movie?.title}

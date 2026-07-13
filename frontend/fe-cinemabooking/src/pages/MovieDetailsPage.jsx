@@ -97,7 +97,7 @@ export default function MovieDetailsPage() {
         </div>
       </div>);
     }
-    const backdrop = movie.backdrop_url || movie.poster_url;
+    const backdrop = movie.backgroundImage || movie.backdrop_url || movie.poster || movie.poster_url;
     const canBook = movie.status === 'now_showing' && showtimes.length > 0;
     return (<div className="min-h-screen">
       <section className="relative overflow-hidden">
@@ -109,7 +109,7 @@ export default function MovieDetailsPage() {
           {/* Movie Poster */}
           <div>
             <div className="max-w-[260px]">
-              <img src={movie.poster_url || ''} alt={movie.title} className="w-full rounded-lg shadow-2xl shadow-black/60"/>
+              <img src={movie.poster || movie.poster_url || ''} alt={movie.title} className="w-full rounded-lg shadow-2xl shadow-black/60"/>
             </div>
           </div>
 

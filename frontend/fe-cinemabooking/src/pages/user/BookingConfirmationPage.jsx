@@ -49,7 +49,7 @@ export default function BookingConfirmationPage() {
         
         {booking && (<div className="overflow-hidden rounded-xl border border-white/10 bg-dark-900 text-left shadow-2xl shadow-black/30">
             <div className="grid grid-cols-1 md:grid-cols-[180px_1fr]">
-              <img src={booking.showtime.movie.poster_url} alt={booking.showtime.movie.title} className="h-full min-h-64 w-full object-cover"/>
+              <img src={booking.showtime.movie.poster || booking.showtime.movie.poster_url} alt={booking.showtime.movie.title} className="h-full min-h-64 w-full object-cover"/>
               <div className="p-6">
                 <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row">
                   <div>
