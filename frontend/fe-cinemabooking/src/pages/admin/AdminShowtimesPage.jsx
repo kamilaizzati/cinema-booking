@@ -81,7 +81,7 @@ const ShowtimeForm = ({ showtimeToEdit, showtimes = [], onClose, onSave }) => {
     } else {
       reset();
     }
-  }, [showtimeToEdit, reset]);
+  }, [showtimeToEdit, reset, movies, halls, bioskop]);
 
   // 👈 4. Otomatis RESET pilihan Studio jika user mengubah Cinema/Bioskop di tengah jalan
   useEffect(() => {
