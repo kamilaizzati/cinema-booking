@@ -43,6 +43,52 @@ export default function PaymentPage() {
     const [bookingData, setBookingData] = useState(null);
     const [paymentMethod, setPaymentMethod] = useState('qris');
     useEffect(() => {
+        if (!bookingData) return undefined;
+
+        const message = 'Are you sure you want to leave? Your booking may be cancelled.';
+
+        const handleBeforeUnload = (event) => {
+            event.preventDefault();
+            event.returnValue = message;
+            return message;
+        };
+
+        const handleDocumentClick = (event) => {
+            const anchor = event.target.closest?.('a[href]');
+            if (!anchor) return;
+            if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey) return;
+            if (anchor.target && anchor.target !== '_self') return;
+
+            const nextUrl = new URL(anchor.href, window.location.href);
+            if (nextUrl.origin !== window.location.origin) return;
+            if (nextUrl.pathname === window.location.pathname) return;
+            if (nextUrl.pathname === '/booking-confirmation') return;
+
+            const confirmed = window.confirm(message);
+            if (!confirmed) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        };
+
+        const handlePopState = () => {
+            const confirmed = window.confirm(message);
+            if (!confirmed) {
+                window.history.pushState(null, '', window.location.href);
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('popstate', handlePopState);
+        document.addEventListener('click', handleDocumentClick, true);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+            document.removeEventListener('click', handleDocumentClick, true);
+        };
+    }, [bookingData]);
+    useEffect(() => {
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
         loadBookingData();
     }, []);

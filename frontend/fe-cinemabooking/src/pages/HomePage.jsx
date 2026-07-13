@@ -314,10 +314,106 @@ export default function HomePage() {
 
 function MovieRail({ movies, showtimeMovieIds }) {
   const railRef = useRef(null);
+  const isJumpingRef = useRef(false);
+  const draggedClickRef = useRef(false);
+  const dragRef = useRef({
+    active: false,
+    moved: false,
+    startX: 0,
+    scrollLeft: 0,
+  });
+
+  const loopedMovies = movies.length > 1 ? [...movies, ...movies, ...movies] : movies;
+
+  const normalizeScroll = () => {
+    const rail = railRef.current;
+    if (!rail || movies.length <= 1 || isJumpingRef.current) return;
+
+    const segmentWidth = rail.scrollWidth / 3;
+    if (!segmentWidth) return;
+
+    if (rail.scrollLeft < segmentWidth * 0.08) {
+      isJumpingRef.current = true;
+      rail.scrollLeft += segmentWidth;
+      window.requestAnimationFrame(() => {
+        isJumpingRef.current = false;
+      });
+    } else if (rail.scrollLeft > segmentWidth * 1.92) {
+      isJumpingRef.current = true;
+      rail.scrollLeft -= segmentWidth;
+      window.requestAnimationFrame(() => {
+        isJumpingRef.current = false;
+      });
+    }
+  };
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail || movies.length <= 1) return;
+
+    const scrollToMiddle = () => {
+      rail.scrollLeft = rail.scrollWidth / 3;
+    };
+
+    scrollToMiddle();
+    window.requestAnimationFrame(scrollToMiddle);
+  }, [movies.length]);
+
+  if (!movies.length) return null;
+
   const scrollRail = (direction) => {
     const rail = railRef.current;
     if (!rail) return;
-    rail.scrollBy({ left: direction * rail.clientWidth * 0.8, behavior: "smooth" });
+
+    rail.scrollBy({
+      left: direction * rail.clientWidth * 0.85,
+      behavior: "smooth",
+    });
+  };
+
+  const handlePointerDown = (event) => {
+    if (event.button !== 0 || !railRef.current) return;
+
+    dragRef.current = {
+      active: true,
+      moved: false,
+      startX: event.clientX,
+      scrollLeft: railRef.current.scrollLeft,
+    };
+    railRef.current.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event) => {
+    const rail = railRef.current;
+    const drag = dragRef.current;
+    if (!rail || !drag.active) return;
+
+    const deltaX = event.clientX - drag.startX;
+    if (Math.abs(deltaX) > 4) {
+      drag.moved = true;
+      draggedClickRef.current = true;
+      event.preventDefault();
+    }
+
+    rail.scrollLeft = drag.scrollLeft - deltaX;
+  };
+
+  const handlePointerUp = (event) => {
+    const rail = railRef.current;
+    const drag = dragRef.current;
+    if (!rail || !drag.active) return;
+
+    drag.active = false;
+    rail.releasePointerCapture(event.pointerId);
+    normalizeScroll();
+  };
+
+  const handleClickCapture = (event) => {
+    if (!draggedClickRef.current) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    draggedClickRef.current = false;
   };
 
   return (
@@ -325,16 +421,26 @@ function MovieRail({ movies, showtimeMovieIds }) {
       <button
         type="button"
         onClick={() => scrollRail(-1)}
+        disabled={movies.length <= 1}
         className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/20 bg-dark-950/90 p-2 text-white shadow-lg transition hover:bg-primary-500 sm:inline-flex"
         aria-label="Scroll film ke kiri"
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
-      <div ref={railRef} className="cinema-row infinite-card-rail">
-        {movies.map((movie) => (
+      <div
+        ref={railRef}
+        className="cinema-row infinite-card-rail"
+        onScroll={normalizeScroll}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onClickCapture={handleClickCapture}
+      >
+        {loopedMovies.map((movie, index) => (
           <div
             className="movie-reveal-card w-[215px] flex-none sm:w-[235px] lg:w-[250px]"
-            key={movie._id}
+            key={`${movie._id}-${index}`}
           >
             <MovieCard
               movie={movie}
@@ -349,6 +455,7 @@ function MovieRail({ movies, showtimeMovieIds }) {
       <button
         type="button"
         onClick={() => scrollRail(1)}
+        disabled={movies.length <= 1}
         className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/20 bg-dark-950/90 p-2 text-white shadow-lg transition hover:bg-primary-500 sm:inline-flex"
         aria-label="Scroll film ke kanan"
       >

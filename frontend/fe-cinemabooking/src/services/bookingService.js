@@ -11,6 +11,11 @@ const CONFIRMED_BOOKING_KEY = 'cinematix_confirmed_booking';
  */
 export const normalizeBooking = (booking) => {
   if (!booking) return booking;
+  const showtime = booking.showtimeId || booking.showtime || null;
+  const studio = showtime?.studioId || null;
+  const bioskop = showtime?.bioskopId || null;
+  const movie = booking.movieId || showtime?.movieId || showtime?.movie || null;
+
   return {
     ...booking,
     // Normalisasi seats: backend simpan ObjectId atau {_id, code}, ambil code-nya
@@ -27,18 +32,30 @@ export const normalizeBooking = (booking) => {
         }
       : booking.user || null,
     // Normalisasi showtime agar struktur sesuai ekspektasi frontend
-    showtime: booking.showtimeId
+    showtime: showtime
       ? {
-          ...booking.showtimeId,
-          movie: booking.movieId || booking.showtimeId?.movieId || null,
+          ...showtime,
+          movie,
+          bioskop,
+          cinema: bioskop,
+          cinema_name:
+            bioskop?.name ||
+            showtime?.bioskop?.name ||
+            showtime?.cinema_name ||
+            showtime?.cinema ||
+            '-',
           hall: {
+            ...(typeof studio === 'object' && studio !== null ? studio : {}),
             hall_name:
-              booking.showtimeId?.studio ||
-              booking.showtimeId?.studioId?.name ||
+              studio?.name ||
+              showtime?.studio ||
+              showtime?.hall?.hall_name ||
               'Studio',
+            studioId: studio?._id || showtime?.studioId || null,
           },
-          show_date: booking.showtimeId?.date || null,
-          start_time: booking.showtimeId?.startTime || null,
+          show_date: showtime?.date || showtime?.show_date || null,
+          start_time: showtime?.startTime || showtime?.start_time || null,
+          end_time: showtime?.endTime || showtime?.end_time || null,
         }
       : booking.showtime || null,
   };

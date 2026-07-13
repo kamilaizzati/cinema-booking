@@ -7,17 +7,22 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import toast from "react-hot-toast";
 
 const LOGIN_LOCK_KEY = "cinematix_login_lock_until";
-const LOGIN_LOCK_SECONDS = 15 * 60;
+const LOGIN_LOCK_SECONDS = 5 * 60;
 
-const getRemainingLockSeconds = () => Math.max(
-  0,
-  Math.ceil((Number(sessionStorage.getItem(LOGIN_LOCK_KEY)) - Date.now()) / 1000),
-);
+const getRemainingLockSeconds = () =>
+  Math.max(
+    0,
+    Math.ceil(
+      (Number(sessionStorage.getItem(LOGIN_LOCK_KEY)) - Date.now()) / 1000,
+    ),
+  );
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [remainingLockSeconds, setRemainingLockSeconds] = useState(getRemainingLockSeconds);
+  const [remainingLockSeconds, setRemainingLockSeconds] = useState(
+    getRemainingLockSeconds,
+  );
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,10 +51,12 @@ export default function LoginPage() {
       const { error } = await signIn(data.email, data.password);
       if (error) {
         if (error.response?.status === 429) {
-          const lockedUntil = Date.now() + (LOGIN_LOCK_SECONDS * 1000);
+          const lockedUntil = Date.now() + LOGIN_LOCK_SECONDS * 1000;
           sessionStorage.setItem(LOGIN_LOCK_KEY, String(lockedUntil));
           setRemainingLockSeconds(LOGIN_LOCK_SECONDS);
-          toast.error("Terlalu banyak percobaan login. Silakan coba lagi setelah 15 menit.");
+          toast.error(
+            "Terlalu banyak percobaan login. Silakan coba lagi setelah 5 menit.",
+          );
         } else {
           toast.error("Invalid email or password");
         }
@@ -80,8 +87,12 @@ export default function LoginPage() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {remainingLockSeconds > 0 && (
-            <div role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
-              Terlalu banyak percobaan login. Silakan tunggu {lockMinutes}:{lockSeconds} sebelum mencoba lagi.
+            <div
+              role="alert"
+              className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300"
+            >
+              Terlalu banyak percobaan login. Silakan tunggu {lockMinutes}:
+              {lockSeconds} sebelum mencoba lagi.
             </div>
           )}
           <div className="space-y-4">
@@ -153,7 +164,13 @@ export default function LoginPage() {
               disabled={loading || remainingLockSeconds > 0}
               className="btn btn-primary w-full text-lg py-3"
             >
-              {loading ? <LoadingSpinner size="sm" /> : remainingLockSeconds > 0 ? `Coba lagi dalam ${lockMinutes}:${lockSeconds}` : "Sign In"}
+              {loading ? (
+                <LoadingSpinner size="sm" />
+              ) : remainingLockSeconds > 0 ? (
+                `Coba lagi dalam ${lockMinutes}:${lockSeconds}`
+              ) : (
+                "Sign In"
+              )}
             </button>
           </div>
 

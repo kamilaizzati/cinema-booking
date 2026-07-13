@@ -41,6 +41,54 @@ export default function BookingPage() {
   const [selectedDateFilter, setSelectedDateFilter] = useState("");
 
   useEffect(() => {
+    if (!selectedShowtime && selectedSeats.length === 0) return undefined;
+
+    const message =
+      "Are you sure you want to leave? Your selected seats may be cancelled.";
+
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = message;
+      return message;
+    };
+
+    const handleDocumentClick = (event) => {
+      const anchor = event.target.closest?.("a[href]");
+      if (!anchor) return;
+      if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      if (anchor.target && anchor.target !== "_self") return;
+
+      const nextUrl = new URL(anchor.href, window.location.href);
+      if (nextUrl.origin !== window.location.origin) return;
+      if (nextUrl.pathname === window.location.pathname) return;
+      if (nextUrl.pathname === "/payment") return;
+
+      const confirmed = window.confirm(message);
+      if (!confirmed) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    const handlePopState = () => {
+      const confirmed = window.confirm(message);
+      if (!confirmed) {
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+    document.addEventListener("click", handleDocumentClick, true);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("click", handleDocumentClick, true);
+    };
+  }, [selectedShowtime, selectedSeats.length]);
+
+  useEffect(() => {
     // 1. Generate Array Tanggal untuk 7 Hari ke Depan
     const generateDates = () => {
       const dates = [];

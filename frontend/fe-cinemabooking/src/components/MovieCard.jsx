@@ -4,9 +4,8 @@ export default function MovieCard({ movie, hasShowtimes = true }) {
   const isComingSoon = movie.status === "coming_soon";
   const canBook = !isComingSoon && hasShowtimes;
   const releaseYear = new Date(movie.release_date).getFullYear();
-  const genres = Array.isArray(movie.genre)
-    ? movie.genre.join(", ")
-    : movie.genre;
+  const genres = (Array.isArray(movie.genre) ? movie.genre : [movie.genre])
+    .filter(Boolean);
   return (
     <div className="movie-card group flex h-full flex-col">
       <div className="relative aspect-[2/3] flex-none overflow-hidden">
@@ -71,9 +70,14 @@ export default function MovieCard({ movie, hasShowtimes = true }) {
           </div>
         </div>
         <div className="mb-4 flex min-h-[2rem] flex-wrap content-start gap-2">
-          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-            {genres}
-          </span>
+          {genres.map((genre) => (
+            <span
+              key={genre}
+              className="rounded-full bg-primary-950/80 px-3 py-1 text-xs font-bold text-primary-300 ring-1 ring-primary-500/15"
+            >
+              {genre}
+            </span>
+          ))}
           {isComingSoon && (
             <span className="rounded-full bg-accent-500/15 px-3 py-1 text-xs font-semibold text-accent-300">
               {new Date(movie.release_date).toLocaleDateString("en-US", {
