@@ -373,6 +373,13 @@ function MovieRail({ movies, showtimeMovieIds }) {
 
   const handlePointerDown = (event) => {
     if (event.button !== 0 || !railRef.current) return;
+    if (event.target.closest("a, button")) {
+      dragRef.current.active = false;
+      draggedClickRef.current = false;
+      return;
+    }
+
+    draggedClickRef.current = false;
 
     dragRef.current = {
       active: true,
