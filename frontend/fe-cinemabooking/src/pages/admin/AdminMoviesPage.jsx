@@ -22,6 +22,9 @@ const MovieForm = ({ movieToEdit, onClose, onSave }) => {
         genre: Array.isArray(movieToEdit.genre)
           ? movieToEdit.genre.join(", ")
           : movieToEdit.genre,
+        cast: Array.isArray(movieToEdit.cast)
+          ? movieToEdit.cast.join(", ")
+          : movieToEdit.cast || "",
         release_date: movieToEdit.release_date
           ? new Date(movieToEdit.release_date).toISOString().split("T")[0]
           : "",
@@ -30,6 +33,8 @@ const MovieForm = ({ movieToEdit, onClose, onSave }) => {
       reset({
         title: "",
         description: "",
+        director: "",
+        cast: "",
         genre: "",
         duration: "",
         release_date: "",
@@ -48,6 +53,12 @@ const MovieForm = ({ movieToEdit, onClose, onSave }) => {
         ...formData,
         duration: Number(formData.duration),
         rating: formData.rating ? Number(formData.rating) : undefined,
+        cast: formData.cast
+          ? formData.cast
+              .split(",")
+              .map((cast) => cast.trim())
+              .filter(Boolean)
+          : [],
         genre: formData.genre
           .split(",")
           .map((genre) => genre.trim())
@@ -110,6 +121,22 @@ const MovieForm = ({ movieToEdit, onClose, onSave }) => {
               className="input"
               rows={4}
             ></textarea>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Director</label>
+            <input
+              {...register("director")}
+              className="input"
+              placeholder="e.g. Christopher Nolan"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Cast</label>
+            <input
+              {...register("cast")}
+              className="input"
+              placeholder="Separate names with comma, e.g. Actor One, Actor Two"
+            />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
