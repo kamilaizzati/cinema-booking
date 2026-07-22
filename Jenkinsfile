@@ -32,8 +32,8 @@ pipeline {
         stage('Seed Database') {
             steps {
                 echo 'Seeding database...'
-                // Tunggu backend siap menerima koneksi
-                bat 'timeout /t 10 /nobreak'
+                // Tunggu backend siap menerima koneksi (~10 detik)
+                bat 'ping -n 11 127.0.0.1 > nul'
                 bat 'docker exec cinema-backend node seed/seed.js'
             }
         }
