@@ -35,6 +35,10 @@ app.use(cookieParser());
 // Serve static files dari folder uploads
 app.use("/uploads", express.static(uploadsDir));
 
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/bioskop", bioskopRoutes);
