@@ -107,7 +107,7 @@ export default function Header({ sidebarCollapsed = false, onToggleSidebar }) {
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-500">
               <Film className="h-5 w-5 text-white"/>
             </span>
-            <span className="text-lg font-black text-white">Cinema<span className="text-primary-500">Flix</span></span>
+            <span className="text-lg font-black text-white">Cinema<span className="text-primary-500">ID</span></span>
           </Link>
           <nav className="flex min-w-0 flex-1 items-center justify-end gap-2 overflow-x-auto">
             <form onSubmit={handleSearchSubmit} className={clsx('flex shrink-0 items-center overflow-hidden rounded-full border transition-all duration-300', searchOpen ? 'w-44 border-white/30 bg-black/70 pl-3 pr-1 sm:w-64' : 'w-10 border-transparent bg-transparent px-0 hover:bg-white/10')}>
