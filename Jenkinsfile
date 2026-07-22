@@ -33,7 +33,7 @@ pipeline {
             steps {
                 echo 'Seeding database...'
                 // Tunggu backend siap menerima koneksi (~10 detik)
-                bat 'ping -n 11 127.0.0.1 > nul'
+                sleep(time: 10, unit: 'SECONDS')
                 bat 'docker exec cinema-backend node seed/seed.js'
             }
         }
