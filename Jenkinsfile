@@ -29,6 +29,15 @@ pipeline {
             }
         }
 
+        stage('Seed Database') {
+            steps {
+                echo 'Seeding database...'
+                // Tunggu backend siap menerima koneksi
+                bat 'timeout /t 10 /nobreak'
+                bat 'docker exec cinema-backend node seed/seed.js'
+            }
+        }
+
         stage('Cleanup') {
             steps {
                 echo 'Cleaning up dangling images...'
