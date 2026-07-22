@@ -8,7 +8,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Clone repo private menggunakan credential github-pat (username/password)
                 git branch: 'Jenkis',
                     url: 'https://github.com/RefaMuhammad/cinema-booking.git',
                     credentialsId: 'github-pat'
@@ -25,7 +24,6 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                // Stop container lama, lalu jalankan yang baru
                 bat 'docker compose down'
                 bat 'docker compose up -d'
             }
