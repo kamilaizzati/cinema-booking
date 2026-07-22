@@ -154,7 +154,7 @@ export default function HomePage() {
             <div ref={heroCopyRef} className="max-w-3xl">
               <div className="mb-5 flex flex-wrap items-center gap-3">
                 <span className="cinema-badge bg-primary-500/95">
-                  Sedang Diputar
+                  Sedang Diputar Testing Jenkins
                 </span>
                 {heroMovie.classification && (
                   <span className="cinema-badge">
