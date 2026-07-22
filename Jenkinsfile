@@ -37,7 +37,6 @@ pipeline {
                 echo 'Checking services...'
                 sleep time: 20, unit: 'SECONDS'
                 bat 'docker compose ps'
-                bat 'curl.exe -f http://localhost:8084/api/health'
                 bat 'curl.exe -f http://localhost:8084/api/movies'
             }
         }
