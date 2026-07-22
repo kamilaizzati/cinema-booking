@@ -73,7 +73,7 @@ export default function Header({ sidebarCollapsed = false, onToggleSidebar }) {
               <Film className="h-5 w-5 text-white"/>
             </span>
             <span className="text-xl font-display font-black tracking-tight text-white">
-              Cinema<span className="text-primary-500">Flix</span>
+              Cinema<span className="text-primary-500">netflix</span>
             </span>
           </Link>
         </div>
